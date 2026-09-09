@@ -52,6 +52,15 @@ I audited the live site on desktop (1440px) and mobile (390px), read the rendere
 - **Portfolio allocation** bar by category with a legend.
 - **Sticky filter toolbar** on the markets page and count-up hero stats.
 
+### Round 3: onboarding and a Southeast Asian audience
+The live site mixes Chinese and English market titles in one grid, has no language setting, and drops new users straight into a trading UI with no explanation. This round fixes all three.
+
+- **Language switcher** in the top bar and in the sign-in modal: English, 中文, Bahasa Melayu and हिन्दी. The whole interface re-renders server-side in the chosen language (persisted in a cookie, `<html lang>` updated). English and Chinese are complete; Malay and Hindi cover navigation, home, market cards, trading and portfolio and fall back to English elsewhere.
+- **Translated market titles.** Every seed market has a Chinese, Malay and Hindi title. Cards and market pages show the visitor's language with a small "Translated" badge and the original on hover, so nothing is hidden. In production these would live on the market document and go through review; here they ship with the seed.
+- **Guided tour** for first-time visitors: a six-step spotlight over the real UI (a market card, the Yes/No buttons, search, portfolio, language and theme) with keyboard navigation, remembered dismissal, and "Take the tour" in the sidebar and Learn page to replay it.
+- **Learn page** (`/learn`): six short lessons, an interactive payout calculator, and a five-question quiz that awards a Learner badge. Linked from the hero, the sidebar, the footer and the tour.
+- Light, dark and system themes were already in place; the tour now points them out.
+
 ### Engineering
 - **Node API** under `/api/*` (markets, market detail, trades, portfolio, session, watchlist, feed, search, leaderboard, newsletter, health) with a consistent `{ ok, data | error }` envelope, validation and cache headers.
 - **MongoDB via Mongoose**, with a repository layer (`src/lib/repo.ts`) that is the single place pages and API routes read from. If `MONGODB_URI` is not set, the same repository runs on an in-memory seed store, so the app always works and tests never need a database.

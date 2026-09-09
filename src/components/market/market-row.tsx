@@ -1,15 +1,20 @@
+"use client";
+
 import Link from "next/link";
 import { Sparkline } from "@/components/ui/sparkline";
 import { formatCents, formatCompact, formatMoney, formatPct } from "@/lib/format";
+import { useI18n } from "@/lib/i18n/client";
 import { primaryOutcome } from "@/lib/pricing";
 import type { MarketSummary } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CATEGORY_MAP } from "@/lib/categories";
 import { ChangeChip, MarketIcon } from "./bits";
+import { LocalizedTitle } from "./localized-title";
 import { WatchButton } from "./watch-button";
 
 /** Dense list row used by the list view, trending page and sidebars. */
 export function MarketRow({ market, rank, className, compact }: { market: MarketSummary; rank?: number; className?: string; compact?: boolean }) {
+  const { t } = useI18n();
   const primary = primaryOutcome(market);
   const href = `/markets/${market.slug}`;
   const yes = market.outcomes.find((o) => o.id === "yes");
@@ -20,14 +25,14 @@ export function MarketRow({ market, rank, className, compact }: { market: Market
       <MarketIcon icon={market.icon} category={market.category} size="sm" />
       <div className="min-w-0 flex-1">
         <Link href={href} className="line-clamp-1 text-sm font-semibold after:absolute after:inset-0 after:content-['']">
-          {market.title}
+          <LocalizedTitle slug={market.slug} title={market.title} badge={false} />
         </Link>
         <p className="mt-0.5 flex items-center gap-2 text-xs text-muted">
           <span style={{ color: CATEGORY_MAP[market.category].color }} className="font-semibold">
             {CATEGORY_MAP[market.category].label}
           </span>
-          <span className="tabular">{formatMoney(market.volume)} vol</span>
-          {!compact && <span className="hidden tabular sm:inline">{formatCompact(market.traders)} traders</span>}
+          <span className="tabular">{formatMoney(market.volume)} {t("common.vol")}</span>
+          {!compact && <span className="hidden tabular sm:inline">{formatCompact(market.traders)} {t("common.traders")}</span>}
         </p>
       </div>
       {!compact && <Sparkline data={market.spark} width={72} height={26} className="hidden md:block" />}
@@ -40,15 +45,15 @@ export function MarketRow({ market, rank, className, compact }: { market: Market
           {market.kind === "binary" && yes && no ? (
             <>
               <Link href={`${href}?outcome=yes`} className="rounded-lg bg-yes-soft px-2.5 py-1.5 text-xs font-bold text-yes hover:brightness-95 dark:hover:brightness-125">
-                Yes {formatCents(yes.price)}
+                {t("common.yes")} {formatCents(yes.price)}
               </Link>
               <Link href={`${href}?outcome=no`} className="rounded-lg bg-no-soft px-2.5 py-1.5 text-xs font-bold text-no hover:brightness-95 dark:hover:brightness-125">
-                No {formatCents(no.price)}
+                {t("common.no")} {formatCents(no.price)}
               </Link>
             </>
           ) : (
             <Link href={href} className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs font-semibold hover:bg-surface-3">
-              {market.outcomes.length} outcomes
+              {t("common.outcomes", { n: market.outcomes.length })}
             </Link>
           )}
         </div>

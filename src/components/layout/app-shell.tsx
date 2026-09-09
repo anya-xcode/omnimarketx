@@ -3,6 +3,7 @@
 import { Suspense, useEffect } from "react";
 import { ThemeProvider } from "next-themes";
 import { NavProgress } from "./nav-progress";
+import { Tour } from "@/components/onboarding/tour";
 import { useSession } from "@/store/session";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthModal } from "./auth-modal";
@@ -44,6 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <MobileNav />
       <CommandPalette />
       <AuthModal />
+      <Tour />
       <Toaster />
     </ThemeProvider>
   );

@@ -1,12 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { Clock, Users } from "lucide-react";
 import { Sparkline } from "@/components/ui/sparkline";
 import { ProgressBar } from "@/components/ui/primitives";
-import { formatCents, formatCompact, formatMoney, formatPct, timeUntil } from "@/lib/format";
+import { formatCents, formatCompact, formatMoney, formatPct } from "@/lib/format";
+import { timeUntilLocalized } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { primaryOutcome } from "@/lib/pricing";
 import type { MarketSummary } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CategoryBadge, ChangeChip, MarketIcon, outcomeColor, regionFlag } from "./bits";
+import { LocalizedTitle } from "./localized-title";
 import { WatchButton } from "./watch-button";
 
 /**
@@ -14,6 +19,7 @@ import { WatchButton } from "./watch-button";
  * frame (header / body / footer / actions) so the grid stays aligned.
  */
 export function MarketCard({ market, className, priority }: { market: MarketSummary; className?: string; priority?: boolean }) {
+  const { t } = useI18n();
   const primary = primaryOutcome(market);
   const href = `/markets/${market.slug}`;
   const flag = regionFlag(market.region);
@@ -23,6 +29,7 @@ export function MarketCard({ market, className, priority }: { market: MarketSumm
 
   return (
     <article
+      data-tour="market-card"
       className={cn("card group relative flex flex-col p-4 transition-[box-shadow,transform,border-color] hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float", className)}
       aria-label={market.title}
     >
@@ -42,7 +49,7 @@ export function MarketCard({ market, className, priority }: { market: MarketSumm
         <MarketIcon icon={market.icon} category={market.category} />
         <h3 className="line-clamp-2 min-h-[2.75rem] text-[15px] font-semibold leading-[1.35]">
           <Link href={href} className="after:absolute after:inset-0 after:rounded-[18px] after:content-['']">
-            {market.title}
+            <LocalizedTitle slug={market.slug} title={market.title} />
           </Link>
         </h3>
       </div>
@@ -53,7 +60,7 @@ export function MarketCard({ market, className, priority }: { market: MarketSumm
             <div>
               <p className="text-3xl font-bold tabular tracking-tight leading-none">{formatPct(primary.price)}</p>
               <p className="mt-1.5 flex items-center gap-2 text-xs text-muted">
-                chance <ChangeChip delta={market.change24h} />
+                {t("common.chance")} <ChangeChip delta={market.change24h} />
               </p>
             </div>
             <Sparkline data={market.spark} width={104} height={36} />
@@ -67,35 +74,35 @@ export function MarketCard({ market, className, priority }: { market: MarketSumm
                 <ProgressBar value={o.price} color={outcomeColor(i)} className="col-span-2" />
               </li>
             ))}
-            {market.outcomes.length > 3 && <li className="text-xs text-faint">+{market.outcomes.length - 3} more outcomes</li>}
+            {market.outcomes.length > 3 && <li className="text-xs text-faint">{t("common.moreOutcomes", { n: market.outcomes.length - 3 })}</li>}
           </ul>
         )}
       </div>
 
       <div className="mt-4 flex items-center gap-3 text-xs text-muted">
         <span className="font-semibold tabular text-text">{formatMoney(market.volume)}</span>
-        <span className="text-faint">vol</span>
+        <span className="text-faint">{t("common.vol")}</span>
         <span className="flex items-center gap-1 tabular">
           <Users className="size-3.5" aria-hidden /> {formatCompact(market.traders)}
         </span>
         <span className="ml-auto flex items-center gap-1" suppressHydrationWarning>
-          <Clock className="size-3.5" aria-hidden /> {timeUntil(market.closesAt)}
+          <Clock className="size-3.5" aria-hidden /> {timeUntilLocalized(t, market.closesAt)}
         </span>
       </div>
 
-      <div className="relative z-10 mt-3 grid grid-cols-2 gap-2">
+      <div className="relative z-10 mt-3 grid grid-cols-2 gap-2" data-tour="trade-buttons">
         {market.kind === "binary" && yes && no ? (
           <>
             <Link href={`${href}?outcome=yes`} className="flex h-9 items-center justify-center gap-1.5 rounded-xl bg-yes-soft text-sm font-bold text-yes transition-[filter] hover:brightness-95 dark:hover:brightness-125">
-              Yes <span className="font-semibold opacity-80">{formatCents(yes.price)}</span>
+              {t("common.yes")} <span className="font-semibold opacity-80">{formatCents(yes.price)}</span>
             </Link>
             <Link href={`${href}?outcome=no`} className="flex h-9 items-center justify-center gap-1.5 rounded-xl bg-no-soft text-sm font-bold text-no transition-[filter] hover:brightness-95 dark:hover:brightness-125">
-              No <span className="font-semibold opacity-80">{formatCents(no.price)}</span>
+              {t("common.no")} <span className="font-semibold opacity-80">{formatCents(no.price)}</span>
             </Link>
           </>
         ) : (
           <Link href={href} className="col-span-2 flex h-9 items-center justify-center rounded-xl bg-surface-2 text-sm font-semibold transition-colors hover:bg-surface-3">
-            View {market.outcomes.length} outcomes
+            {t("common.viewOutcomes", { n: market.outcomes.length })}
           </Link>
         )}
       </div>

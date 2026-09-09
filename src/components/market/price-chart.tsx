@@ -6,6 +6,7 @@ import { Segmented } from "@/components/ui/primitives";
 import type { Outcome, PricePoint } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { outcomeColor } from "./bits";
+import { useI18n } from "@/lib/i18n/client";
 
 type Range = "1D" | "1W" | "1M" | "ALL";
 const RANGE_MS: Record<Range, number> = { "1D": 86_400_000, "1W": 7 * 86_400_000, "1M": 30 * 86_400_000, ALL: Infinity };
@@ -31,6 +32,7 @@ export function PriceChart({
   onSelect?: (id: string) => void;
   className?: string;
 }) {
+  const { t } = useI18n();
   const [range, setRange] = useState<Range>("1M");
   const [visible, setVisible] = useState<string[]>(() =>
     kind === "binary" ? ["yes"] : [...outcomes].sort((a, b) => b.price - a.price).slice(0, 4).map((o) => o.id),
@@ -73,7 +75,7 @@ export function PriceChart({
     <div className={cn("card p-4 sm:p-5", className)}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold">Price history</h2>
+          <h2 className="text-base font-bold">{t("market.priceHistory")}</h2>
           <p className="text-xs text-muted">
             {outcomes.find((o) => o.id === selected)?.label}{" "}
             <span className={cn("font-semibold tabular", delta >= 0 ? "text-yes" : "text-no")}>

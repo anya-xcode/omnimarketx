@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { api, isSignedIn, useSession } from "@/store/session";
 import { toast } from "@/store/toast";
 import { outcomeColor } from "./bits";
+import { useI18n } from "@/lib/i18n/client";
 
 const QUICK = [10, 50, 100, 500];
 
@@ -36,6 +37,7 @@ export function TradePanel({
 }) {
   const id = (s: string) => `${idPrefix ?? "trade"}-${s}`;
   const router = useRouter();
+  const { t } = useI18n();
   const { user, setUser, openAuth } = useSession();
   const [side, setSide] = useState<TradeSide>("buy");
   const [amount, setAmount] = useState("25");
@@ -72,14 +74,14 @@ export function TradePanel({
       setUser(res.user);
       onTraded(res.market);
       toast({
-        title: side === "buy" ? `Bought ${res.trade.shares.toFixed(2)} ${outcome.label} shares` : `Sold ${res.trade.shares.toFixed(2)} ${outcome.label} shares`,
+        title: side === "buy" ? t("trade.bought", { n: res.trade.shares.toFixed(2), outcome: outcome.label }) : t("trade.sold", { n: res.trade.shares.toFixed(2), outcome: outcome.label }),
         description: `${formatMoney(res.trade.amount, { compact: false })} at ${formatCents(res.trade.price)} · new price ${formatCents(res.market.outcomes.find((o) => o.id === outcome.id)?.price ?? 0)}`,
         variant: "success",
       });
       if (side === "sell") setSharesToSell("");
       router.refresh();
     } catch (err) {
-      toast({ title: "Trade failed", description: err instanceof Error ? err.message : "Please try again", variant: "error" });
+      toast({ title: t("trade.failed"), description: err instanceof Error ? err.message : "Please try again", variant: "error" });
     } finally {
       setBusy(false);
     }
@@ -88,8 +90,8 @@ export function TradePanel({
   return (
     <section className={cn("card overflow-hidden", className)} aria-label="Trade">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <Segmented value={side} onChange={setSide} size="sm" ariaLabel="Buy or sell" options={[{ value: "buy", label: "Buy" }, { value: "sell", label: "Sell" }]} />
-        <span className="inline-flex items-center gap-1 rounded-md bg-accent-soft px-2 py-1 text-[11px] font-semibold text-accent">Demo mode</span>
+        <Segmented value={side} onChange={setSide} size="sm" ariaLabel="Buy or sell" options={[{ value: "buy", label: t("trade.buy") }, { value: "sell", label: t("trade.sell") }]} />
+        <span className="inline-flex items-center gap-1 rounded-md bg-accent-soft px-2 py-1 text-[11px] font-semibold text-accent">{t("common.demoMode")}</span>
       </div>
 
       <div className="space-y-4 p-4">
@@ -140,7 +142,7 @@ export function TradePanel({
 
         {position && side === "buy" && !closed && (
           <p className="flex items-center justify-between rounded-xl bg-accent-soft px-3 py-2 text-xs text-accent">
-            <span>You hold {position.shares.toFixed(2)} {outcome.label} shares</span>
+            <span>{t("trade.youHold", { n: position.shares.toFixed(2), outcome: outcome.label })}</span>
             <span className={cn("font-bold tabular", position.pnl >= 0 ? "text-yes" : "text-no")}>
               {position.pnl >= 0 ? "+" : "-"}${Math.abs(position.pnl).toFixed(2)}
             </span>
@@ -149,16 +151,16 @@ export function TradePanel({
 
         {closed ? (
           <p className="flex items-center gap-2 rounded-xl bg-surface-2 p-3 text-sm text-muted">
-            <Lock className="size-4" /> This market is closed for trading.
+            <Lock className="size-4" /> {t("trade.closed")}
           </p>
         ) : side === "buy" ? (
           <>
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label htmlFor={id("amount")} className="text-sm font-semibold">
-                  Amount
+                  {t("trade.amount")}
                 </label>
-                <span className="text-xs text-muted tabular">Balance {user ? formatMoney(user.balance, { compact: false }) : "…"}</span>
+                <span className="text-xs text-muted tabular">{t("trade.balance")} {user ? formatMoney(user.balance, { compact: false }) : "…"}</span>
               </div>
               <div className="relative">
                 <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg font-bold text-faint">$</span>
@@ -178,28 +180,28 @@ export function TradePanel({
                   </button>
                 ))}
                 <button type="button" onClick={() => user && setAmount(String(Math.floor(user.balance)))} className="flex-1 rounded-lg bg-surface-2 py-1.5 text-xs font-semibold hover:bg-surface-3">
-                  Max
+                  {t("trade.max")}
                 </button>
               </div>
               {insufficient && (
                 <p className="mt-1.5 text-xs font-medium text-no" role="alert">
-                  Exceeds your demo balance.
+                  {t("trade.exceeds")}
                 </p>
               )}
             </div>
 
             <dl className="space-y-1.5 rounded-xl bg-surface-2 p-3 text-sm">
-              <div className="flex justify-between"><dt className="text-muted">Avg. price</dt><dd className="font-semibold tabular">{formatCents(outcome.price)}</dd></div>
-              <div className="flex justify-between"><dt className="text-muted">Shares</dt><dd className="font-semibold tabular">{q.shares.toFixed(2)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">{t("trade.avgPrice")}</dt><dd className="font-semibold tabular">{formatCents(outcome.price)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">{t("trade.shares")}</dt><dd className="font-semibold tabular">{q.shares.toFixed(2)}</dd></div>
               <div className="flex justify-between border-t border-border pt-1.5">
-                <dt className="text-muted">Potential payout</dt>
+                <dt className="text-muted">{t("trade.payout")}</dt>
                 <dd className="font-bold tabular text-yes">{formatMoney(q.payout, { compact: false })} <span className="text-xs font-semibold">(+{formatPct(q.roi)})</span></dd>
               </div>
             </dl>
 
             <Button size="lg" className="w-full" loading={busy} disabled={!Number.isFinite(amt) || amt < 1 || insufficient} onClick={submit}
               style={{ background: outcome.id === "no" ? "var(--no)" : outcome.id === "yes" ? "var(--yes)" : undefined, color: outcome.id === "yes" || outcome.id === "no" ? "#fff" : undefined }}>
-              Buy {outcome.label} · {formatMoney(Number.isFinite(amt) ? amt : 0, { compact: false })}
+              {t("trade.buyButton", { outcome: outcome.label })} · {formatMoney(Number.isFinite(amt) ? amt : 0, { compact: false })}
             </Button>
           </>
         ) : (
@@ -207,18 +209,18 @@ export function TradePanel({
             <div className="rounded-xl bg-surface-2 p-3 text-sm">
               {position ? (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted">You hold</span>
+                  <span className="text-muted">{t("trade.holdShort")}</span>
                   <span className="font-semibold tabular">{position.shares.toFixed(2)} shares @ {formatCents(position.avgPrice)}</span>
                 </div>
               ) : (
-                <p className="text-muted">You don&apos;t hold any {outcome.label} shares in this market yet.</p>
+                <p className="text-muted">{t("trade.noShares", { outcome: outcome.label })}</p>
               )}
             </div>
             {position && (
               <>
                 <div>
                   <label htmlFor={id("shares")} className="mb-1.5 block text-sm font-semibold">
-                    Shares to sell
+                    {t("trade.sharesToSell")}
                   </label>
                   <input
                     id={id("shares")}
@@ -237,11 +239,11 @@ export function TradePanel({
                   </div>
                 </div>
                 <dl className="space-y-1.5 rounded-xl bg-surface-2 p-3 text-sm">
-                  <div className="flex justify-between"><dt className="text-muted">Sell price</dt><dd className="font-semibold tabular">{formatCents(outcome.price)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-muted">You receive</dt><dd className="font-bold tabular">{formatMoney(sellProceeds, { compact: false })}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted">{t("trade.sellPrice")}</dt><dd className="font-semibold tabular">{formatCents(outcome.price)}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted">{t("trade.receive")}</dt><dd className="font-bold tabular">{formatMoney(sellProceeds, { compact: false })}</dd></div>
                 </dl>
                 <Button size="lg" variant="secondary" className="w-full" loading={busy} disabled={!Number.isFinite(sell) || sell <= 0 || sell > position.shares + 1e-6} onClick={submit}>
-                  Sell {outcome.label}
+                  {t("trade.sellButton", { outcome: outcome.label })}
                 </Button>
               </>
             )}
@@ -252,14 +254,14 @@ export function TradePanel({
           <Info className="mt-0.5 size-3 shrink-0" />
           <span>
             {isSignedIn(user) ? (
-              <>Trading as <strong className="text-muted">{user?.name}</strong>. Prices move with each trade to simulate market impact.</>
+              <>{t("trade.tradingAs")} <strong className="text-muted">{user?.name}</strong>. {t("trade.impactNote")}</>
             ) : (
               <>
-                You&apos;re trading with a demo balance.{" "}
+                {t("trade.demoNote")}{" "}
                 <button type="button" onClick={openAuth} className="font-semibold text-brand hover:underline">
-                  Choose a display name
+                  {t("trade.chooseName")}
                 </button>{" "}
-                to appear on the activity feed.
+                {t("trade.toAppear")}
               </>
             )}
           </span>

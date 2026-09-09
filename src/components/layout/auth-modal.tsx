@@ -1,15 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
+import { useI18n } from "@/lib/i18n/client";
+import type { Locale } from "@/lib/i18n";
 import { useSession } from "@/store/session";
 import { toast } from "@/store/toast";
+import { LocaleSelect, saveLocale } from "./locale-switcher";
 
 export function AuthModal() {
   const { authOpen, closeAuth, signIn } = useSession();
+  const { t, locale } = useI18n();
+  const router = useRouter();
   const [name, setName] = useState("");
+  const [lang, setLang] = useState<Locale>(locale);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,9 +25,11 @@ export function AuthModal() {
     setBusy(true);
     setError(null);
     try {
+      if (lang !== locale) await saveLocale(lang);
       const u = await signIn(name);
-      toast({ title: `Welcome, ${u.name.split(" ")[0]}!`, description: "Your $10,000 demo balance is ready to trade.", variant: "success" });
+      toast({ title: t("auth.welcome", { name: u.name.split(" ")[0] }), description: t("auth.welcomeBody"), variant: "success" });
       setName("");
+      if (lang !== locale) router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not sign in");
     } finally {
@@ -29,21 +38,18 @@ export function AuthModal() {
   };
 
   return (
-    <Modal open={authOpen} onClose={closeAuth} title="Start trading in seconds">
+    <Modal open={authOpen} onClose={closeAuth} title={t("auth.title")}>
       <form onSubmit={submit} className="space-y-5">
-        <p className="text-sm text-muted">
-          This is a demo environment. Pick a display name and you get a <strong className="text-text">$10,000 demo balance</strong> to trade
-          every market. No email, password or wallet required.
-        </p>
+        <p className="text-sm text-muted">{t("auth.body", { balance: "$10,000" })}</p>
         <div>
           <label htmlFor="auth-name" className="mb-1.5 block text-sm font-semibold">
-            Display name
+            {t("auth.name")}
           </label>
           <input
             id="auth-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Priya Raman"
+            placeholder={t("auth.namePlaceholder")}
             autoComplete="nickname"
             maxLength={40}
             required
@@ -55,13 +61,20 @@ export function AuthModal() {
             </p>
           )}
         </div>
+        <div>
+          <label htmlFor="auth-lang" className="mb-1.5 block text-sm font-semibold">
+            {t("auth.language")}
+          </label>
+          <LocaleSelect id="auth-lang" value={lang} onChange={setLang} />
+          <p className="mt-1 text-xs text-faint">{t("auth.languageHint")}</p>
+        </div>
         <ul className="grid gap-2 text-xs text-muted sm:grid-cols-3">
-          <li className="flex items-center gap-2 rounded-lg bg-surface-2 px-2.5 py-2"><Wallet className="size-3.5 text-brand" /> $10k demo funds</li>
-          <li className="flex items-center gap-2 rounded-lg bg-surface-2 px-2.5 py-2"><Sparkles className="size-3.5 text-brand" /> Live price impact</li>
-          <li className="flex items-center gap-2 rounded-lg bg-surface-2 px-2.5 py-2"><ShieldCheck className="size-3.5 text-brand" /> No real money</li>
+          <li className="flex items-center gap-2 rounded-lg bg-surface-2 px-2.5 py-2"><Wallet className="size-3.5 text-brand" /> {t("auth.funds")}</li>
+          <li className="flex items-center gap-2 rounded-lg bg-surface-2 px-2.5 py-2"><Sparkles className="size-3.5 text-brand" /> {t("auth.impact")}</li>
+          <li className="flex items-center gap-2 rounded-lg bg-surface-2 px-2.5 py-2"><ShieldCheck className="size-3.5 text-brand" /> {t("auth.noMoney")}</li>
         </ul>
         <Button type="submit" size="lg" className="w-full" loading={busy} disabled={name.trim().length < 2}>
-          Continue
+          {t("auth.continue")}
         </Button>
       </form>
     </Modal>

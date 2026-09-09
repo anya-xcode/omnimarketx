@@ -6,12 +6,14 @@ import { CATEGORIES, CATEGORY_MAP } from "@/lib/categories";
 import { formatCents, formatDate, formatMoney, formatSignedMoney, timeAgo } from "@/lib/format";
 import { getPositions, getTrades, getUser } from "@/lib/repo";
 import { getSessionId } from "@/lib/session";
+import { getT } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Portfolio", robots: { index: false } };
 
 export default async function PortfolioPage() {
   const id = await getSessionId();
+  const { t } = await getT();
   const [user, positions, trades] = await Promise.all([getUser(id), id ? getPositions(id) : [], id ? getTrades(id, 30) : []]);
   const balance = user?.balance ?? 10_000;
   const invested = positions.reduce((s, p) => s + p.invested, 0);
@@ -22,16 +24,16 @@ export default async function PortfolioPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-brand">Your account</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Portfolio</h1>
-        <p className="mt-1 text-sm text-muted">{user ? `Trading as ${user.name}` : "Demo account"} · balances are simulated, no real money.</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-brand">{t("portfolio.eyebrow")}</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{t("portfolio.title")}</h1>
+        <p className="mt-1 text-sm text-muted">{user ? t("portfolio.tradingAs", { name: user.name }) : "Demo"} · {t("portfolio.sub")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Available balance" value={formatMoney(balance, { compact: false })} hint="Demo funds" />
-        <Stat label="Positions value" value={formatMoney(value, { compact: false })} hint={`${positions.length} open position${positions.length === 1 ? "" : "s"}`} />
-        <Stat label="Invested" value={formatMoney(invested, { compact: false })} />
-        <Stat label="Unrealised P&L" value={<span className={pnl >= 0 ? "text-yes" : "text-no"}>{formatSignedMoney(pnl)}</span>} hint={invested > 0 ? `${((pnl / invested) * 100).toFixed(1)}% return` : undefined} />
+        <Stat label={t("portfolio.available")} value={formatMoney(balance, { compact: false })} hint="Demo funds" />
+        <Stat label={t("portfolio.positionsValue")} value={formatMoney(value, { compact: false })} hint={`${positions.length} open position${positions.length === 1 ? "" : "s"}`} />
+        <Stat label={t("portfolio.invested")} value={formatMoney(invested, { compact: false })} />
+        <Stat label={t("portfolio.pnl")} value={<span className={pnl >= 0 ? "text-yes" : "text-no"}>{formatSignedMoney(pnl)}</span>} hint={invested > 0 ? `${((pnl / invested) * 100).toFixed(1)}% return` : undefined} />
       </div>
 
       {allocation.length > 0 && (
@@ -58,13 +60,13 @@ export default async function PortfolioPage() {
       )}
 
       <section>
-        <h2 className="mb-3 text-lg font-bold">Open positions</h2>
+        <h2 className="mb-3 text-lg font-bold">{t("portfolio.open")}</h2>
         {positions.length === 0 ? (
           <EmptyState
             icon={Briefcase}
-            title="No open positions yet"
-            description="Buy Yes or No shares on any market and they'll show up here with live value and P&L."
-            action={{ label: "Find a market", href: "/markets" }}
+            title={t("portfolio.emptyTitle")}
+            description={t("portfolio.emptyBody")}
+            action={{ label: t("portfolio.find"), href: "/markets" }}
           />
         ) : (
           <div className="card overflow-x-auto">
@@ -106,7 +108,7 @@ export default async function PortfolioPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-bold">Trade history</h2>
+        <h2 className="mb-3 text-lg font-bold">{t("portfolio.history")}</h2>
         {trades.length === 0 ? (
           <EmptyState icon={History} title="No trades yet" description="Your buys and sells will be listed here." />
         ) : (

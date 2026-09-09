@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Sora, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/layout/app-shell";
+import { I18nProvider } from "@/lib/i18n/client";
+import { getLocale } from "@/lib/i18n/server";
 import "./globals.css";
 
 const sora = Sora({ variable: "--font-sora", subsets: ["latin"], display: "swap" });
@@ -33,11 +35,14 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
   return (
-    <html lang="en" suppressHydrationWarning className={`${sora.variable} ${geistMono.variable} h-full`}>
+    <html lang={locale} suppressHydrationWarning className={`${sora.variable} ${geistMono.variable} h-full`}>
       <body className="min-h-full">
-        <AppShell>{children}</AppShell>
+        <I18nProvider locale={locale}>
+          <AppShell>{children}</AppShell>
+        </I18nProvider>
       </body>
     </html>
   );

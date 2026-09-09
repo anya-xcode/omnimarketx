@@ -6,6 +6,7 @@ import { MoversRail } from "@/components/home/sections";
 import { isCategoryId } from "@/lib/categories";
 import { formatMoney } from "@/lib/format";
 import { getMovers, getPlatformStats, getTrendingMarkets } from "@/lib/repo";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Trending", description: "Real-time ranking of the most active prediction markets on OmniMarketX." };
 export const revalidate = 30;
@@ -13,7 +14,7 @@ export const revalidate = 30;
 export default async function TrendingPage(props: PageProps<"/trending">) {
   const sp = await props.searchParams;
   const category = isCategoryId(sp.category) ? sp.category : "all";
-  const [markets, movers, stats] = await Promise.all([getTrendingMarkets(15, category), getMovers(8), getPlatformStats()]);
+  const [markets, movers, stats, { t }] = await Promise.all([getTrendingMarkets(15, category), getMovers(8), getPlatformStats(), getT()]);
   const avgMove = markets.length ? markets.reduce((s, m) => s + Math.abs(m.change24h), 0) / markets.length : 0;
   const pulse = Math.min(100, Math.round(avgMove * 2500));
   const label = pulse < 25 ? "Calm" : pulse < 55 ? "Active" : pulse < 80 ? "Volatile" : "Frenzied";
@@ -23,9 +24,9 @@ export default async function TrendingPage(props: PageProps<"/trending">) {
       <div>
         <p className="text-xs font-semibold uppercase tracking-wider text-brand">Live</p>
         <h1 className="mt-1 flex items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl">
-          <Flame className="size-7 text-brand" /> Trending
+          <Flame className="size-7 text-brand" /> {t("trending.title")}
         </h1>
-        <p className="mt-1 text-sm text-muted">Ranked by volume, trader activity and 24-hour momentum.</p>
+        <p className="mt-1 text-sm text-muted">{t("trending.sub")}</p>
       </div>
 
       <CategoryChips active={category} basePath="/trending" />

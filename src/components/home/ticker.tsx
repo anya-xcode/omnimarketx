@@ -3,6 +3,7 @@ import { formatPct } from "@/lib/format";
 import { primaryOutcome } from "@/lib/pricing";
 import type { MarketSummary } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { LocalizedTitle } from "@/components/market/localized-title";
 
 function TickerRow({ items, ariaHidden }: { items: MarketSummary[]; ariaHidden?: boolean }) {
   return (
@@ -18,7 +19,7 @@ function TickerRow({ items, ariaHidden }: { items: MarketSummary[]; ariaHidden?:
               className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs transition-colors hover:border-border-strong"
             >
               <span aria-hidden>{m.icon}</span>
-              <span className="max-w-[220px] truncate font-medium">{m.title}</span>
+              <span className="max-w-[220px] truncate font-medium"><LocalizedTitle slug={m.slug} title={m.title} badge={false} /></span>
               <span className="font-bold tabular">{formatPct(p.price)}</span>
               <span className={cn("font-semibold tabular", up ? "text-yes" : "text-no")}>
                 {up ? "▲" : "▼"} {Math.abs(m.change24h * 100).toFixed(1)}

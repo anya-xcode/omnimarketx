@@ -7,6 +7,7 @@ import { CATEGORIES, isCategoryId } from "@/lib/categories";
 import { formatCompact, formatMoney, formatPct } from "@/lib/format";
 import { getTraders } from "@/lib/repo";
 import { cn } from "@/lib/utils";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Leaderboard", description: "Top predictors on OmniMarketX ranked by ROI, profit, volume and win rate." };
 export const revalidate = 60;
@@ -26,6 +27,7 @@ const SORTS = [
 
 export default async function LeaderboardPage(props: PageProps<"/leaderboard">) {
   const sp = await props.searchParams;
+  const { t } = await getT();
   const category = isCategoryId(sp.category) ? sp.category : "all";
   const period = PERIODS.find((p) => p.id === sp.period) ?? PERIODS[2];
   const sort = SORTS.find((s) => s.id === sp.sort) ?? SORTS[0];
@@ -43,7 +45,7 @@ export default async function LeaderboardPage(props: PageProps<"/leaderboard">) 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-brand">Compete</p>
           <h1 className="mt-1 flex items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl">
-            <Trophy className="size-7 text-warn" /> Leaderboard
+            <Trophy className="size-7 text-warn" /> {t("leaderboard.title")}
           </h1>
           <p className="mt-1 text-sm text-muted">Rankings refresh as trades settle. Demo balances count.</p>
         </div>

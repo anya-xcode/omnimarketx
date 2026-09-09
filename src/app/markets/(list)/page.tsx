@@ -5,6 +5,7 @@ import { MarketCardSkeleton } from "@/components/market/market-card";
 import { CATEGORY_MAP } from "@/lib/categories";
 import { parseMarketQuery } from "@/lib/market-query";
 import { listMarkets } from "@/lib/repo";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "Markets",
@@ -14,15 +15,15 @@ export const metadata: Metadata = {
 export default async function MarketsPage(props: PageProps<"/markets">) {
   const sp = await props.searchParams;
   const query = parseMarketQuery(sp);
-  const page = await listMarkets(query);
+  const [page, { t }] = await Promise.all([listMarkets(query), getT()]);
   const cat = query.category && query.category !== "all" ? CATEGORY_MAP[query.category] : null;
 
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-brand">Browse</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{cat ? `${cat.emoji} ${cat.label} markets` : "All markets"}</h1>
-        <p className="mt-1 text-sm text-muted">{cat ? cat.description : "Every open market, live. Prices are the crowd's probability."}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-brand">{t("markets.browse")}</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{cat ? `${cat.emoji} ${cat.label}` : t("markets.all")}</h1>
+        <p className="mt-1 text-sm text-muted">{cat ? cat.description : t("markets.allSub")}</p>
       </div>
       <Suspense
         fallback={

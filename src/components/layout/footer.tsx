@@ -16,6 +16,7 @@ const COLUMNS = [
   {
     title: "Product",
     links: [
+      { label: "Learn", href: "/learn" },
       { label: "How it works", href: "/#how-it-works" },
       { label: "Portfolio", href: "/portfolio" },
       { label: "Leaderboard", href: "/leaderboard" },

@@ -10,6 +10,7 @@ import type { Market } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { ChangeChip, outcomeColor } from "./bits";
 import { TradePanel } from "./trade-panel";
+import { useI18n } from "@/lib/i18n/client";
 
 const PriceChart = dynamic(() => import("./price-chart").then((m) => m.PriceChart), {
   ssr: false,
@@ -26,6 +27,7 @@ const PriceChart = dynamic(() => import("./price-chart").then((m) => m.PriceChar
  * updates the header probability, outcome bars, chart and trade panel together.
  */
 export function MarketWorkspace({ market: initial, initialOutcome, closed = false }: { market: Market; initialOutcome?: string; closed?: boolean }) {
+  const { t } = useI18n();
   const [market, setMarket] = useState(initial);
   const [selected, setSelected] = useState(() =>
     initial.outcomes.some((o) => o.id === initialOutcome) ? (initialOutcome as string) : primaryOutcome(initial).id,
@@ -43,17 +45,17 @@ export function MarketWorkspace({ market: initial, initialOutcome, closed = fals
         {market.kind === "binary" ? (
           <div className="card flex flex-wrap items-center justify-between gap-4 p-5">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted">Current odds</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">{t("market.currentOdds")}</p>
               <p className="mt-1 flex items-baseline gap-2">
                 <span className="text-5xl font-bold tabular tracking-tight text-yes">{formatPct(primary.price)}</span>
-                <span className="text-sm font-medium text-muted">chance of Yes</span>
+                <span className="text-sm font-medium text-muted">{t("home.chanceYes")}</span>
               </p>
               <ChangeChip delta={market.change24h} size="md" className="mt-2" />
             </div>
             <div className="w-full sm:w-64">
               <div className="mb-1.5 flex justify-between text-xs font-semibold">
-                <span className="text-yes">Yes {formatCents(yes?.price ?? 0)}</span>
-                <span className="text-no">No {formatCents(no?.price ?? 0)}</span>
+                <span className="text-yes">{t("common.yes")} {formatCents(yes?.price ?? 0)}</span>
+                <span className="text-no">{t("common.no")} {formatCents(no?.price ?? 0)}</span>
               </div>
               <div className="flex h-2.5 overflow-hidden rounded-full bg-no-soft">
                 <div className="h-full rounded-full bg-yes transition-[width] duration-500" style={{ width: `${(yes?.price ?? 0) * 100}%` }} />
@@ -63,7 +65,7 @@ export function MarketWorkspace({ market: initial, initialOutcome, closed = fals
         ) : (
           <div className="card p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold">Outcomes</h2>
+              <h2 className="text-base font-bold">{t("market.outcomes")}</h2>
               <ChangeChip delta={market.change24h} />
             </div>
             <ul className="space-y-1">
@@ -104,15 +106,15 @@ export function MarketWorkspace({ market: initial, initialOutcome, closed = fals
         {market.kind === "binary" && yes && no ? (
           <div className="grid grid-cols-2 gap-2">
             <button type="button" onClick={() => { setSelected("yes"); setSheet(true); }} className="h-11 rounded-xl bg-yes text-sm font-bold text-white">
-              Buy Yes · {formatCents(yes.price)}
+              {t("market.buyYes")} · {formatCents(yes.price)}
             </button>
             <button type="button" onClick={() => { setSelected("no"); setSheet(true); }} className="h-11 rounded-xl bg-no text-sm font-bold text-white">
-              Buy No · {formatCents(no.price)}
+              {t("market.buyNo")} · {formatCents(no.price)}
             </button>
           </div>
         ) : (
           <button type="button" onClick={() => setSheet(true)} className="h-11 w-full rounded-xl bg-brand text-sm font-bold text-brand-fg">
-            Trade · {market.outcomes.find((o) => o.id === selected)?.label} {formatCents(market.outcomes.find((o) => o.id === selected)?.price ?? 0)}
+            {t("market.trade")} · {market.outcomes.find((o) => o.id === selected)?.label} {formatCents(market.outcomes.find((o) => o.id === selected)?.price ?? 0)}
           </button>
         )}
       </div>

@@ -5,24 +5,27 @@ import { usePathname } from "next/navigation";
 import { Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/format";
+import { useI18n } from "@/lib/i18n/client";
 import { useSession } from "@/store/session";
+import { TourButton } from "@/components/onboarding/tour";
 import { Logo } from "./logo";
 import { PRIMARY_NAV, SECONDARY_NAV, isActivePath, type NavItem } from "./nav-config";
 import { ThemeToggle } from "./theme-toggle";
 import { SidebarWatchlist } from "./sidebar-watchlist";
 
-function NavLink({ item, active, badge }: { item: NavItem; active: boolean; badge?: number }) {
+function NavLink({ item, active, badge, label }: { item: NavItem; active: boolean; badge?: number; label: string }) {
   return (
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
+      data-tour={item.tour}
       className={cn(
         "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
         active ? "bg-brand-soft text-brand" : "text-muted hover:bg-surface-2 hover:text-text",
       )}
     >
       <item.icon className={cn("size-[18px] shrink-0", active ? "text-brand" : "text-faint group-hover:text-text")} />
-      <span className="truncate">{item.label}</span>
+      <span className="truncate">{label}</span>
       {badge ? <span className="ml-auto rounded-md bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold tabular text-muted">{badge}</span> : null}
     </Link>
   );
@@ -31,6 +34,7 @@ function NavLink({ item, active, badge }: { item: NavItem; active: boolean; badg
 export function Sidebar() {
   const pathname = usePathname();
   const user = useSession((s) => s.user);
+  const { t } = useI18n();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-border bg-surface lg:flex" aria-label="Primary">
@@ -40,16 +44,17 @@ export function Sidebar() {
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-4">
         <div className="space-y-0.5">
           {PRIMARY_NAV.map((item) => (
-            <NavLink key={item.href} item={item} active={isActivePath(pathname, item.href)} badge={item.href === "/watchlist" ? user?.watchlist.length || undefined : undefined} />
+            <NavLink key={item.href} item={item} label={t(item.labelKey)} active={isActivePath(pathname, item.href)} badge={item.href === "/watchlist" ? user?.watchlist.length || undefined : undefined} />
           ))}
         </div>
         <SidebarWatchlist />
         <div>
-          <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-faint">Discover</p>
+          <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-faint">{t("nav.discover")}</p>
           <div className="space-y-0.5">
             {SECONDARY_NAV.map((item) => (
-              <NavLink key={item.href} item={item} active={isActivePath(pathname, item.href)} />
+              <NavLink key={item.href} item={item} label={t(item.labelKey)} active={isActivePath(pathname, item.href)} />
             ))}
+            <TourButton />
           </div>
         </div>
       </nav>
@@ -59,7 +64,7 @@ export function Sidebar() {
             <Wallet className="size-4" />
           </span>
           <span className="min-w-0">
-            <span className="block text-[11px] font-medium text-muted">Demo balance</span>
+            <span className="block text-[11px] font-medium text-muted">{t("nav.demoBalance")}</span>
             <span className="block text-sm font-bold tabular">{user ? formatMoney(user.balance, { compact: false }) : "—"}</span>
           </span>
         </Link>

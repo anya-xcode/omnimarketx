@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("OmniMarketX redesign", () => {
+  // The guided tour auto-opens for first-time visitors; mark it done so it doesn't block clicks.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("omx:tour-done", "1"));
+  });
+
   test("home renders server-side content without a loading spinner", async ({ page }) => {
     const res = await page.goto("/");
     expect(res?.status()).toBe(200);
@@ -15,6 +20,52 @@ test.describe("OmniMarketX redesign", () => {
     // Tabs swap the rail client-side.
     await tabs.getByRole("tab", { name: "Closing soon" }).click();
     await expect(page.getByRole("tabpanel").getByRole("article").first()).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("guided tour opens for first-time visitors and can be completed", async ({ page }) => {
+    // Simulate a first visit: clear the flag once, then let the app persist dismissal across the reload below.
+    await page.addInitScript(() => {
+      if (!sessionStorage.getItem("omx-e2e-cleared")) {
+        localStorage.removeItem("omx:tour-done");
+        sessionStorage.setItem("omx-e2e-cleared", "1");
+      }
+    });
+    await page.goto("/");
+    const dialog = page.getByRole("dialog", { name: "Welcome to OmniMarketX" });
+    await expect(dialog).toBeVisible({ timeout: 10_000 });
+    await dialog.getByRole("button", { name: "Next" }).click();
+    await expect(page.getByRole("dialog", { name: "Every card is a question" })).toBeVisible();
+    await page.getByRole("button", { name: "Close" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    // Dismissal is remembered.
+    await page.reload();
+    await page.waitForTimeout(1500);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  });
+
+  test("language switcher translates the interface and market titles", async ({ page, isMobile }) => {
+    await page.goto("/markets");
+    await page.getByRole("button", { name: "Language" }).click();
+    await page.getByRole("option", { name: /中文/ }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("所有市场", { timeout: 15_000 });
+    await expect(page.getByRole("article").first()).toContainText("已翻译");
+    if (!isMobile) await expect(page.getByRole("link", { name: "市场", exact: true }).first()).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "zh");
+    // Back to English via the API-backed cookie.
+    await page.getByRole("button", { name: "语言" }).click();
+    await page.getByRole("option", { name: /English/ }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("All markets", { timeout: 15_000 });
+  });
+
+  test("learn page has lessons, a calculator and a passable quiz", async ({ page }) => {
+    await page.goto("/learn");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("five minutes");
+    await expect(page.getByRole("heading", { name: "Payout calculator" })).toBeVisible();
+    // Answer the quiz correctly: options 1, 2, 2, 1, 2 (1-indexed).
+    const answers = ["The market thinks there is a 62% chance of Yes", "$10", "They pay nothing", "$1", "When the published resolution source confirms the outcome"];
+    for (const a of answers) await page.getByRole("radio", { name: a, exact: true }).click();
+    await page.getByRole("button", { name: "Check answers" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Learner badge earned" })).toBeVisible();
   });
 
   test("watchlist star adds a market to the watchlist page", async ({ page }) => {
@@ -78,6 +129,8 @@ test.describe("OmniMarketX redesign", () => {
     expect(body.data.items.every((m: { category: string }) => m.category === "sports")).toBe(true);
     const bad = await request.post("/api/trades", { data: { slug: "nope", outcomeId: "yes", side: "buy", amount: 5 } });
     expect(bad.status()).toBe(404);
+    const badLocale = await request.post("/api/locale", { data: { locale: "xx" } });
+    expect(badLocale.status()).toBe(400);
   });
 
   test("unknown market shows a friendly 404", async ({ page }) => {

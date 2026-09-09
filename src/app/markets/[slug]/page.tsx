@@ -8,10 +8,13 @@ import { MarketWorkspace } from "@/components/market/market-workspace";
 import { WatchButton } from "@/components/market/watch-button";
 import { ShareButton } from "@/components/market/share-button";
 import { CATEGORY_MAP } from "@/lib/categories";
-import { formatCents, formatCompact, formatDate, formatMoney, formatPct, timeAgo, timeUntil } from "@/lib/format";
+import { formatCents, formatCompact, formatDate, formatMoney, formatPct, timeAgo } from "@/lib/format";
 import { isMarketClosed, primaryOutcome } from "@/lib/pricing";
 import { getMarket, getMarketActivity, getRelatedMarkets } from "@/lib/repo";
 import { cn } from "@/lib/utils";
+import { getT } from "@/lib/i18n/server";
+import { timeUntilLocalized } from "@/lib/i18n";
+import { LocalizedTitle } from "@/components/market/localized-title";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +31,7 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
   const [{ slug }, sp] = await Promise.all([props.params, props.searchParams]);
   const market = await getMarket(slug);
   if (!market) notFound();
-  const [related, activity] = await Promise.all([getRelatedMarkets(market, 3), getMarketActivity(market.slug, 8)]);
+  const [related, activity, { t }] = await Promise.all([getRelatedMarkets(market, 3), getMarketActivity(market.slug, 8), getT()]);
   const cat = CATEGORY_MAP[market.category];
   const flag = regionFlag(market.region);
   const initialOutcome = typeof sp.outcome === "string" ? sp.outcome : undefined;
@@ -37,9 +40,9 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
   return (
     <div className="space-y-6 pb-16 lg:pb-0">
       <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-muted">
-        <Link href="/" className="hover:text-text">Home</Link>
+        <Link href="/" className="hover:text-text">{t("nav.home")}</Link>
         <ChevronRight className="size-3" />
-        <Link href="/markets" className="hover:text-text">Markets</Link>
+        <Link href="/markets" className="hover:text-text">{t("nav.markets")}</Link>
         <ChevronRight className="size-3" />
         <Link href={`/markets?category=${market.category}`} className="hover:text-text">{cat.label}</Link>
       </nav>
@@ -51,15 +54,15 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
             <CategoryBadge category={market.category} />
             {flag && <span aria-label={market.region}>{flag}</span>}
             <span className="inline-flex items-center gap-1 text-xs font-medium text-muted" suppressHydrationWarning>
-              <CalendarClock className="size-3.5" /> {timeUntil(market.closesAt)}
+              <CalendarClock className="size-3.5" /> {timeUntilLocalized(t, market.closesAt)}
             </span>
           </div>
-          <h1 className="mt-2 text-xl font-bold leading-tight tracking-tight sm:text-2xl lg:text-[28px]">{market.title}</h1>
+          <h1 className="mt-2 text-xl font-bold leading-tight tracking-tight sm:text-2xl lg:text-[28px]"><LocalizedTitle slug={market.slug} title={market.title} /></h1>
           {market.subtitle && <p className="mt-1 text-sm text-muted">{market.subtitle}</p>}
           <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-            <div className="flex items-center gap-1.5"><dt className="text-muted">Volume</dt><dd className="font-semibold tabular">{formatMoney(market.volume)}</dd></div>
-            <div className="flex items-center gap-1.5"><dt className="text-muted"><Users className="size-3.5" aria-hidden /><span className="sr-only">Traders</span></dt><dd className="font-semibold tabular">{formatCompact(market.traders)} traders</dd></div>
-            <div className="flex items-center gap-1.5"><dt className="text-muted">Closes</dt><dd className="font-semibold">{formatDate(market.closesAt)}</dd></div>
+            <div className="flex items-center gap-1.5"><dt className="text-muted">{t("market.volume")}</dt><dd className="font-semibold tabular">{formatMoney(market.volume)}</dd></div>
+            <div className="flex items-center gap-1.5"><dt className="text-muted"><Users className="size-3.5" aria-hidden /><span className="sr-only">Traders</span></dt><dd className="font-semibold tabular">{formatCompact(market.traders)} {t("common.traders")}</dd></div>
+            <div className="flex items-center gap-1.5"><dt className="text-muted">{t("market.closes")}</dt><dd className="font-semibold">{formatDate(market.closesAt)}</dd></div>
           </dl>
         </div>
         <div className="flex shrink-0 gap-1">
@@ -72,14 +75,14 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
 
       <section className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="card p-5">
-          <h2 className="text-base font-bold">Rules and resolution</h2>
+          <h2 className="text-base font-bold">{t("market.rules")}</h2>
           <dl className="mt-4 space-y-4 text-sm">
             <div>
-              <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-faint">Resolution</dt>
+              <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-faint">{t("market.resolution")}</dt>
               <dd className="leading-relaxed text-text">{market.resolution}</dd>
             </div>
             <div>
-              <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-faint">Resolution sources</dt>
+              <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-faint">{t("market.sources")}</dt>
               <dd className="flex flex-wrap gap-2">
                 {market.resolutionSources.map((s) => (
                   <span key={s} className="inline-flex items-center gap-1 rounded-lg bg-surface-2 px-2.5 py-1 text-xs font-medium">
@@ -89,10 +92,10 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
               </dd>
             </div>
             <div className="grid grid-cols-2 gap-4 border-t border-border pt-4 sm:grid-cols-4">
-              <div><dt className="text-xs text-muted">Category</dt><dd className="font-medium">{cat.emoji} {cat.label}</dd></div>
-              <div><dt className="text-xs text-muted">Created</dt><dd className="font-medium">{formatDate(market.createdAt)}</dd></div>
-              <div><dt className="text-xs text-muted">Closes</dt><dd className="font-medium">{formatDate(market.closesAt)}</dd></div>
-              <div><dt className="text-xs text-muted">Liquidity</dt><dd className="font-medium tabular">{formatMoney(market.liquidity)}</dd></div>
+              <div><dt className="text-xs text-muted">{t("market.category")}</dt><dd className="font-medium">{cat.emoji} {cat.label}</dd></div>
+              <div><dt className="text-xs text-muted">{t("market.created")}</dt><dd className="font-medium">{formatDate(market.createdAt)}</dd></div>
+              <div><dt className="text-xs text-muted">{t("market.closes")}</dt><dd className="font-medium">{formatDate(market.closesAt)}</dd></div>
+              <div><dt className="text-xs text-muted">{t("market.liquidity")}</dt><dd className="font-medium tabular">{formatMoney(market.liquidity)}</dd></div>
             </div>
           </dl>
           {market.tags.length > 0 && (
@@ -109,13 +112,13 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
         <div className="space-y-5 self-start">
         <div className="card overflow-hidden">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h2 className="text-sm font-bold">Recent activity</h2>
+            <h2 className="text-sm font-bold">{t("market.recentActivity")}</h2>
             <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted">
-              <span className="size-1.5 rounded-full bg-yes animate-pulse-dot" aria-hidden /> Live
+              <span className="size-1.5 rounded-full bg-yes animate-pulse-dot" aria-hidden /> {t("common.live")}
             </span>
           </div>
           {activity.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-muted">No trades yet. Be the first to take a position.</p>
+            <p className="px-4 py-6 text-center text-sm text-muted">{t("market.noActivity")}</p>
           ) : (
             <ul className="divide-y divide-border">
               {activity.map((t) => (
@@ -135,9 +138,9 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
         </div>
         <div className="card overflow-hidden">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h2 className="text-sm font-bold">More in {cat.label}</h2>
+            <h2 className="text-sm font-bold">{t("market.moreIn", { category: cat.label })}</h2>
             <Link href={`/markets?category=${market.category}`} className="text-xs font-semibold text-brand hover:underline">
-              View all
+              {t("common.viewAll")}
             </Link>
           </div>
           <div className="divide-y divide-border">

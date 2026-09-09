@@ -9,24 +9,26 @@ import type { MarketQuery, MarketSummary, Paginated, QuickFilter, SortKey } from
 import { cn } from "@/lib/utils";
 import { useLocalStorageValue } from "@/lib/use-local-storage";
 import { api } from "@/store/session";
+import { useI18n } from "@/lib/i18n/client";
+import type { DictKey } from "@/lib/i18n";
 import { CategoryChips } from "./category-chips";
 import { MarketCard, MarketCardSkeleton } from "./market-card";
 import { MarketRow } from "./market-row";
 
-const SORTS: { value: SortKey; label: string }[] = [
-  { value: "trending", label: "Trending" },
-  { value: "volume", label: "Volume" },
-  { value: "newest", label: "Newest" },
-  { value: "probability", label: "Probability" },
-  { value: "closing", label: "Closing soon" },
+const SORTS: { value: SortKey; label: DictKey }[] = [
+  { value: "trending", label: "markets.sort.trending" },
+  { value: "volume", label: "markets.sort.volume" },
+  { value: "newest", label: "markets.sort.newest" },
+  { value: "probability", label: "markets.sort.probability" },
+  { value: "closing", label: "markets.sort.closing" },
 ];
 
-const FILTERS: { value: QuickFilter; label: string }[] = [
-  { value: "high-volume", label: "High volume" },
-  { value: "rising", label: "Rising" },
-  { value: "falling", label: "Falling" },
-  { value: "new", label: "New" },
-  { value: "closing-soon", label: "Closing soon" },
+const FILTERS: { value: QuickFilter; label: DictKey }[] = [
+  { value: "high-volume", label: "markets.filter.highVolume" },
+  { value: "rising", label: "markets.filter.rising" },
+  { value: "falling", label: "markets.filter.falling" },
+  { value: "new", label: "markets.filter.new" },
+  { value: "closing-soon", label: "markets.filter.closingSoon" },
 ];
 
 function buildHref(pathname: string, current: URLSearchParams, patch: Record<string, string | undefined>) {
@@ -45,6 +47,7 @@ function buildHref(pathname: string, current: URLSearchParams, patch: Record<str
  * server-rendered and "Load more" appends from the JSON API.
  */
 export function MarketsBrowser({ initial, query }: { initial: Paginated<MarketSummary>; query: MarketQuery }) {
+  const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -109,19 +112,19 @@ export function MarketsBrowser({ initial, query }: { initial: Paginated<MarketSu
             ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filter markets by keyword…"
-            aria-label="Filter markets"
+            placeholder={t("markets.filterPlaceholder")}
+            aria-label={t("markets.filterAria")}
             className="h-10 w-full rounded-xl border border-border bg-surface pl-9 pr-9 text-sm outline-none placeholder:text-faint focus:border-brand"
           />
           {search && (
-            <button type="button" onClick={() => setSearch("")} aria-label="Clear search" className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-faint hover:text-text">
+            <button type="button" onClick={() => setSearch("")} aria-label={t("markets.clearSearch")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-faint hover:text-text">
               <X className="size-4" />
             </button>
           )}
         </div>
         <div className="flex items-center gap-2">
           <label htmlFor="sort" className="text-xs font-medium text-muted">
-            Sort
+            {t("markets.sort")}
           </label>
           <select
             id="sort"
@@ -131,15 +134,15 @@ export function MarketsBrowser({ initial, query }: { initial: Paginated<MarketSu
           >
             {SORTS.map((s) => (
               <option key={s.value} value={s.value}>
-                {s.label}
+                {t(s.label)}
               </option>
             ))}
           </select>
           <div className="ml-auto inline-flex rounded-xl bg-surface-2 p-1" role="radiogroup" aria-label="View">
             {(
               [
-                ["grid", LayoutGrid, "Grid view"],
-                ["list", List, "List view"],
+                ["grid", LayoutGrid, t("markets.grid")],
+                ["list", List, t("markets.list")],
               ] as const
             ).map(([v, Icon, label]) => (
               <button
@@ -161,11 +164,11 @@ export function MarketsBrowser({ initial, query }: { initial: Paginated<MarketSu
       <div className="flex flex-wrap items-center gap-2">
         {FILTERS.map((f) => (
           <Chip key={f.value} active={query.filter === f.value} onClick={() => navigate({ filter: query.filter === f.value ? undefined : f.value })}>
-            {f.label}
+            {t(f.label)}
           </Chip>
         ))}
         <p className="ml-auto text-sm text-muted" aria-live="polite">
-          {pending ? "Updating…" : `${total} market${total === 1 ? "" : "s"}`}
+          {pending ? t("common.updating") : `${total} ${total === 1 ? t("common.market") : t("common.markets")}`}
         </p>
       </div>
 
@@ -178,9 +181,9 @@ export function MarketsBrowser({ initial, query }: { initial: Paginated<MarketSu
       ) : items.length === 0 ? (
         <EmptyState
           icon={SearchX}
-          title="No markets match those filters"
-          description="Try a different keyword or category, or clear the filters to see everything that's open."
-          action={{ label: "Clear filters", href: pathname }}
+          title={t("markets.emptyTitle")}
+          description={t("markets.emptyBody")}
+          action={{ label: t("markets.clearFilters"), href: pathname }}
         />
       ) : view === "grid" ? (
         <div className="grid gap-4 stagger sm:grid-cols-2 xl:grid-cols-3">
@@ -199,15 +202,15 @@ export function MarketsBrowser({ initial, query }: { initial: Paginated<MarketSu
       {nextOffset !== null && !pending && (
         <div className="flex justify-center pt-2">
           <Button variant="outline" onClick={loadMore} loading={loadingMore}>
-            Load more ({total - items.length} remaining)
+            {t("common.loadMore", { n: total - items.length })}
           </Button>
         </div>
       )}
       {hasFilters && items.length > 0 && !pending && (
         <p className="text-center text-xs text-faint">
-          Showing filtered results.{" "}
+          {t("markets.showingFiltered")}{" "}
           <button type="button" className="font-semibold text-brand hover:underline" onClick={() => { setSearch(""); router.replace(pathname); }}>
-            Clear all filters
+            {t("markets.clearAll")}
           </button>
         </p>
       )}

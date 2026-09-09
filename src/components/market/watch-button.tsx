@@ -1,6 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
+import { useI18n } from "@/lib/i18n/client";
 import { useSession } from "@/store/session";
 import { toast } from "@/store/toast";
 import { cn } from "@/lib/utils";
@@ -9,17 +10,18 @@ export function WatchButton({ slug, className, size = "sm" }: { slug: string; cl
   const watched = useSession((s) => s.user?.watchlist.includes(slug) ?? false);
   const toggle = useSession((s) => s.toggleWatch);
   const user = useSession((s) => s.user);
+  const { t } = useI18n();
+  const label = watched ? t("common.removeWatch") : t("common.addWatch");
   return (
     <button
       type="button"
       aria-pressed={watched}
-      aria-label={watched ? "Remove from watchlist" : "Add to watchlist"}
-      title={watched ? "Remove from watchlist" : "Add to watchlist"}
+      aria-label={label}
+      title={label}
       onClick={async (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (!user) {
-          // Session is created lazily; make sure it exists before toggling.
           await useSession.getState().load();
           if (!useSession.getState().user) {
             toast({ title: "Couldn't reach the server", description: "Please try again.", variant: "error" });
@@ -27,7 +29,7 @@ export function WatchButton({ slug, className, size = "sm" }: { slug: string; cl
           }
         }
         void toggle(slug);
-        toast({ title: watched ? "Removed from watchlist" : "Added to watchlist", variant: "success" });
+        toast({ title: watched ? t("common.removedWatch") : t("common.addedWatch"), variant: "success" });
       }}
       className={cn(
         "flex items-center justify-center rounded-lg transition-colors",
