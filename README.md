@@ -147,4 +147,4 @@ docs/screenshots/      before/after captures
 
 ---
 
-Built by Twinkle Shah for the OmniMarketX evaluation, September 2026.
+Built by Ananya Gupta for the OmniMarketX evaluation, September 2026.
