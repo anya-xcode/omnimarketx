@@ -91,7 +91,7 @@ export function Chip({
       type="button"
       aria-pressed={active}
       className={cn(
-        "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-colors",
+        "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-colors sm:h-8",
         active ? "border-brand bg-brand-soft text-brand" : "border-border bg-surface text-muted hover:border-border-strong hover:text-text",
         className,
       )}
@@ -109,7 +109,7 @@ export function ChipLink({ active, href, className, children }: { active?: boole
       aria-current={active ? "page" : undefined}
       scroll={false}
       className={cn(
-        "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-colors",
+        "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-colors sm:h-8",
         active ? "border-brand bg-brand-soft text-brand" : "border-border bg-surface text-muted hover:border-border-strong hover:text-text",
         className,
       )}

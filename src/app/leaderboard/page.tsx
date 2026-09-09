@@ -58,7 +58,7 @@ export default async function LeaderboardPage(props: PageProps<"/leaderboard">) 
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
         {PERIODS.map((p) => (
           <ChipLink key={p.id} href={href({ period: p.id })} active={p.id === period.id}>
             {p.label}
@@ -74,21 +74,21 @@ export default async function LeaderboardPage(props: PageProps<"/leaderboard">) 
       </div>
 
       {podium.length === 3 && (
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {[podium[1], podium[0], podium[2]].map((t) => {
             const rank = podium.indexOf(t) + 1;
             return (
-              <div key={t.id} className={cn("card relative flex flex-col items-center p-5 text-center", rank === 1 && "border-warn/60 sm:-translate-y-2")}>
-                <span className={cn("absolute left-4 top-4 text-lg", rank === 1 ? "" : "opacity-80")} aria-label={`Rank ${rank}`}>
+              <div key={t.id} className={cn("card relative flex flex-col items-center p-3 text-center sm:p-5", rank === 1 && "border-warn/60 sm:-translate-y-2")}>
+                <span className={cn("absolute left-2 top-2 text-base sm:left-4 sm:top-4 sm:text-lg", rank === 1 ? "" : "opacity-80")} aria-label={`Rank ${rank}`}>
                   {rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉"}
                 </span>
-                <Avatar name={t.name} color={t.avatarColor} size={rank === 1 ? 64 : 52} />
-                <p className="mt-3 flex items-center gap-1 font-bold">
+                <Avatar name={t.name} color={t.avatarColor} size={rank === 1 ? 52 : 44} />
+                <p className="mt-2 flex items-center justify-center gap-1 text-xs font-bold sm:mt-3 sm:text-base">
                   {t.name} {t.verified && <BadgeCheck className="size-4 text-accent" aria-label="Verified" />}
                 </p>
-                <p className="text-xs text-muted">@{t.handle}</p>
-                <p className="mt-3 text-2xl font-bold tabular text-yes">+{Math.round(t.roi * 100)}%</p>
-                <p className="text-xs text-muted">ROI · {formatMoney(t.pnl)} profit</p>
+                <p className="hidden text-xs text-muted sm:block">@{t.handle}</p>
+                <p className="mt-1 text-lg font-bold tabular text-yes sm:mt-3 sm:text-2xl">+{Math.round(t.roi * 100)}%</p>
+                <p className="text-[11px] text-muted sm:text-xs">ROI · {formatMoney(t.pnl)}</p>
               </div>
             );
           })}
@@ -108,23 +108,23 @@ export default async function LeaderboardPage(props: PageProps<"/leaderboard">) 
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full text-sm">
             <thead className="bg-surface-2 text-left text-xs uppercase tracking-wider text-faint">
               <tr>
                 <th scope="col" className="px-4 py-2.5 font-semibold">#</th>
                 <th scope="col" className="px-4 py-2.5 font-semibold">Trader</th>
                 <th scope="col" className="px-4 py-2.5 text-right font-semibold">ROI</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-semibold">Profit</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-semibold">Volume</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-semibold">Win rate</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-semibold">Streak</th>
+                <th scope="col" className="hidden px-4 py-2.5 text-right font-semibold sm:table-cell">Profit</th>
+                <th scope="col" className="hidden px-4 py-2.5 text-right font-semibold md:table-cell">Volume</th>
+                <th scope="col" className="hidden px-4 py-2.5 text-right font-semibold sm:table-cell">Win rate</th>
+                <th scope="col" className="hidden px-4 py-2.5 text-right font-semibold sm:table-cell">Streak</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {traders.map((t, i) => (
                 <tr key={t.id} className="hover:bg-surface-2">
-                  <td className="px-4 py-3 font-bold tabular text-faint">{i + 1}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-3 font-bold tabular text-faint sm:px-4">{i + 1}</td>
+                  <td className="px-2 py-3 sm:px-4">
                     <div className="flex items-center gap-3">
                       <Avatar name={t.name} color={t.avatarColor} size={32} />
                       <div className="min-w-0">
@@ -135,11 +135,11 @@ export default async function LeaderboardPage(props: PageProps<"/leaderboard">) 
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right font-bold tabular text-yes">+{formatPct(t.roi)}</td>
-                  <td className="px-4 py-3 text-right font-semibold tabular">{formatMoney(t.pnl)}</td>
-                  <td className="px-4 py-3 text-right tabular text-muted">{formatMoney(t.volume)}</td>
-                  <td className="px-4 py-3 text-right tabular">{formatPct(t.winRate)}</td>
-                  <td className="px-4 py-3 text-right tabular">
+                  <td className="px-4 py-3 text-right font-bold tabular text-yes">+{formatPct(t.roi)}<span className="block text-[11px] font-medium text-muted sm:hidden">{formatMoney(t.pnl)}</span></td>
+                  <td className="hidden px-4 py-3 text-right font-semibold tabular sm:table-cell">{formatMoney(t.pnl)}</td>
+                  <td className="hidden px-4 py-3 text-right tabular text-muted md:table-cell">{formatMoney(t.volume)}</td>
+                  <td className="hidden px-4 py-3 text-right tabular sm:table-cell">{formatPct(t.winRate)}</td>
+                  <td className="hidden px-4 py-3 text-right tabular sm:table-cell">
                     {t.streak > 0 ? (
                       <span className="inline-flex items-center gap-1 text-warn"><Flame className="size-3.5" /> {t.streak}</span>
                     ) : (

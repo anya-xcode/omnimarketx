@@ -177,3 +177,15 @@
   & > :nth-child(8) { animation-delay: 280ms; }
   & > :nth-child(n + 9) { animation-delay: 320ms; }
 }
+
+/* ---- Mobile polish ---- */
+@layer base {
+  /* iOS Safari zooms into inputs smaller than 16px; keep them 16px on phones. */
+  @media (max-width: 640px) {
+    input, textarea, select { font-size: 16px; }
+  }
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}

@@ -28,7 +28,7 @@ export function MobileNav() {
                 className={cn("flex flex-col items-center gap-1 py-2 text-[11px] font-medium", active ? "text-brand" : "text-muted")}
               >
                 <item.icon className="size-5" strokeWidth={active ? 2.4 : 2} />
-                <span className="max-w-full truncate px-1">{t(item.labelKey)}</span>
+                <span className="max-w-full truncate px-1">{item.href === "/leaderboard" ? t("nav.leaderboardShort") : t(item.labelKey)}</span>
               </Link>
             </li>
           );

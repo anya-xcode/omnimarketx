@@ -69,7 +69,27 @@ export default async function PortfolioPage() {
             action={{ label: t("portfolio.find"), href: "/markets" }}
           />
         ) : (
-          <div className="card overflow-x-auto">
+          <>
+          <ul className="space-y-3 sm:hidden">
+            {positions.map((p) => (
+              <li key={`${p.marketSlug}-${p.outcomeId}-m`} className="card p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <Link href={`/markets/${p.marketSlug}`} className="line-clamp-2 text-sm font-semibold hover:text-brand">{p.marketTitle}</Link>
+                  <span className={cn("shrink-0 rounded-md px-2 py-0.5 text-xs font-bold", p.outcomeId === "yes" ? "bg-yes-soft text-yes" : p.outcomeId === "no" ? "bg-no-soft text-no" : "bg-accent-soft text-accent")}>{p.outcomeLabel}</span>
+                </div>
+                <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                  <div><dt className="text-muted">Shares</dt><dd className="font-semibold tabular">{p.shares.toFixed(2)}</dd></div>
+                  <div><dt className="text-muted">Avg → Now</dt><dd className="font-semibold tabular">{formatCents(p.avgPrice)} → {formatCents(p.currentPrice)}</dd></div>
+                  <div><dt className="text-muted">Value</dt><dd className="font-semibold tabular">{formatMoney(p.value, { compact: false })}</dd></div>
+                </dl>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className={cn("text-sm font-bold tabular", p.pnl >= 0 ? "text-yes" : "text-no")}>{formatSignedMoney(p.pnl)}</span>
+                  <Link href={`/markets/${p.marketSlug}?outcome=${p.outcomeId}`} className="rounded-lg bg-surface-2 px-3 py-1.5 text-xs font-semibold hover:bg-surface-3">Trade</Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="card hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[720px] text-sm">
               <thead className="bg-surface-2 text-left text-xs uppercase tracking-wider text-faint">
                 <tr>
@@ -104,6 +124,7 @@ export default async function PortfolioPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </section>
 

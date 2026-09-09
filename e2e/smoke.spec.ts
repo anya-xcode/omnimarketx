@@ -127,7 +127,7 @@ test.describe("OmniMarketX redesign", () => {
 
     await page.goto("/portfolio");
     await expect(page.getByRole("heading", { name: "Open positions" })).toBeVisible();
-    await expect(page.getByRole("table").first()).toContainText("Bitcoin");
+    await expect(page.locator("section", { hasText: "Open positions" }).first()).toContainText("Bitcoin");
   });
 
   test("command palette searches markets", async ({ page, isMobile }) => {

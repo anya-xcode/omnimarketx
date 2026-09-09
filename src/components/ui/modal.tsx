@@ -61,11 +61,19 @@ export function Modal({
         aria-modal="true"
         aria-label={typeof title === "string" ? title : undefined}
         className={cn(
-          "card relative w-full max-h-[92dvh] overflow-y-auto shadow-pop",
-          position === "sheet" ? "max-w-lg rounded-b-none sm:rounded-b-[18px]" : "max-w-lg",
+          "card relative w-full max-h-[92dvh] overflow-y-auto overscroll-contain shadow-pop",
+          position === "sheet" ? "max-w-lg rounded-b-none safe-bottom sm:rounded-b-[18px]" : "max-w-lg",
           className,
         )}
       >
+        {position === "sheet" && (
+          <div className="sticky top-0 z-20 flex items-center justify-between bg-surface px-3 pt-2 sm:hidden">
+            <button type="button" onClick={onClose} aria-label="Close" className="mx-auto h-1.5 w-12 rounded-full bg-border-strong" />
+            <button type="button" onClick={onClose} aria-label="Close" className="absolute right-2 top-1.5 rounded-lg p-1.5 text-muted hover:bg-surface-2 hover:text-text">
+              <X className="size-4" />
+            </button>
+          </div>
+        )}
         {(title || !hideClose) && (
           <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-surface px-5 py-3.5">
             <h2 className="text-base font-bold">{title}</h2>

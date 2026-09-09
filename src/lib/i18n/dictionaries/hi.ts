@@ -6,6 +6,7 @@ export const hi: Partial<Record<DictKey, string>> = {
   "nav.markets": "मार्केट",
   "nav.trending": "ट्रेंडिंग",
   "nav.leaderboard": "लीडरबोर्ड",
+  "nav.leaderboardShort": "रैंक",
   "nav.portfolio": "पोर्टफोलियो",
   "nav.watchlist": "वॉचलिस्ट",
   "nav.activity": "गतिविधि",

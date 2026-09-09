@@ -5,6 +5,7 @@ export const zh: Partial<Record<DictKey, string>> = {
   "nav.markets": "市场",
   "nav.trending": "热门",
   "nav.leaderboard": "排行榜",
+  "nav.leaderboardShort": "排行",
   "nav.portfolio": "投资组合",
   "nav.watchlist": "自选",
   "nav.activity": "动态",

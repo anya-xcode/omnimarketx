@@ -5,6 +5,7 @@ export const en = {
   "nav.markets": "Markets",
   "nav.trending": "Trending",
   "nav.leaderboard": "Leaderboard",
+  "nav.leaderboardShort": "Ranks",
   "nav.portfolio": "Portfolio",
   "nav.watchlist": "Watchlist",
   "nav.activity": "Activity",
