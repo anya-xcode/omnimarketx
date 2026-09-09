@@ -4,6 +4,7 @@ import { Suspense, useEffect } from "react";
 import { ThemeProvider } from "next-themes";
 import { NavProgress } from "./nav-progress";
 import { Tour } from "@/components/onboarding/tour";
+import { ChatWidget } from "@/components/support/chat-widget";
 import { useSession } from "@/store/session";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthModal } from "./auth-modal";
@@ -46,6 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <CommandPalette />
       <AuthModal />
       <Tour />
+      <ChatWidget />
       <Toaster />
     </ThemeProvider>
   );

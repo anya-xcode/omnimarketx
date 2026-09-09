@@ -40,6 +40,7 @@ const STEPS: Step[] = [
   { title: "tour.search.title", body: "tour.search.body", target: '[data-tour="search"]' },
   { title: "tour.portfolio.title", body: "tour.portfolio.body", target: '[data-tour="portfolio"]' },
   { title: "tour.settings.title", body: "tour.settings.body", target: '[data-tour="settings"]' },
+  { title: "tour.support.title", body: "tour.support.body", target: '[data-tour="support"]' },
   { title: "tour.done.title", body: "tour.done.body", icon: "grad" },
 ];
 

@@ -1,5 +1,5 @@
 import { buildSeedMarkets, SEED_BLOG, SEED_FEED, SEED_GROUPS, SEED_TRADERS } from "@/data/seed";
-import type { BlogPost, FeedPost, Group, Market, Trade, Trader, User } from "./types";
+import type { BlogPost, FeedPost, Group, Market, SupportTicket, Trade, Trader, User } from "./types";
 
 export interface MemoryStore {
   markets: Market[];
@@ -10,6 +10,7 @@ export interface MemoryStore {
   trades: Trade[];
   users: Map<string, User>;
   subscribers: Set<string>;
+  tickets: SupportTicket[];
 }
 
 declare global {
@@ -34,6 +35,7 @@ export function createMemoryStore(): MemoryStore {
     trades: [],
     users: new Map(),
     subscribers: new Set(),
+    tickets: [],
   };
 }
 

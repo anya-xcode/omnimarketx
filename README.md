@@ -61,6 +61,16 @@ The live site mixes Chinese and English market titles in one grid, has no langua
 - **Learn page** (`/learn`): six short lessons, an interactive payout calculator, and a five-question quiz that awards a Learner badge. Linked from the hero, the sidebar, the footer and the tour.
 - Light, dark and system themes were already in place; the tour now points them out.
 
+### Round 4: a support assistant that answers before it escalates
+The live site's Zendesk chat could not answer "how can I start?" or "explain me that platform" and offered a human for everything, with no idea of when that human would reply. The new assistant (bottom-right on every page) fixes that:
+
+- **Opens with clickable options** (How do I start? · What is OmniMarketX? · How does demo trading work? · Do I need to deposit money? · How do I deposit or withdraw? · How do the social and market features work? · Talk to a human), so nobody has to guess what the bot understands.
+- **13 fixed answers matched first.** Free text is matched by keywords and phrases (`src/lib/support-match.ts`, unit-tested against the two questions above and a set of paraphrases). Only when nothing fits does it suggest the closest options, and it never invents an answer.
+- **Every answer ends with "Read more"** to the relevant page (Learn, Portfolio, Leaderboard, policies), so short answers are not dead ends.
+- **"Talk to a human" is one option among several**, and it states the reply time and support hours ("replies within 2 hours, online 9am-6pm MYT") before taking your question. Tickets are stored via `POST /api/support` with the chat transcript attached.
+- Answers and options are available in English and Chinese, following the site language. The transcript survives page navigation, and the tour's last stop points at the assistant.
+- Content lives in one file (`src/data/support-faq.ts`): adding a question is a few lines of text, not code.
+
 ### Engineering
 - **Node API** under `/api/*` (markets, market detail, trades, portfolio, session, watchlist, feed, search, leaderboard, newsletter, health) with a consistent `{ ok, data | error }` envelope, validation and cache headers.
 - **MongoDB via Mongoose**, with a repository layer (`src/lib/repo.ts`) that is the single place pages and API routes read from. If `MONGODB_URI` is not set, the same repository runs on an in-memory seed store, so the app always works and tests never need a database.

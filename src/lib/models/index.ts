@@ -1,5 +1,5 @@
 import mongoose, { Schema, type Model } from "mongoose";
-import type { BlogPost, FeedPost, Group, Market, Trade, Trader, User } from "@/lib/types";
+import type { BlogPost, FeedPost, Group, Market, SupportTicket, Trade, Trader, User } from "@/lib/types";
 
 const OutcomeSchema = new Schema({ id: String, label: String, price: Number }, { _id: false });
 const PricePointSchema = new Schema({ t: Number, p: Schema.Types.Mixed }, { _id: false });
@@ -115,6 +115,19 @@ const UserSchema = new Schema<User>(
   { versionKey: false },
 );
 
+const SupportTicketSchema = new Schema<SupportTicket>(
+  {
+    id: { type: String, required: true, unique: true },
+    userId: { type: String, required: true, index: true },
+    email: String,
+    message: { type: String, required: true },
+    transcript: [String],
+    status: { type: String, default: "open" },
+    createdAt: { type: String, required: true },
+  },
+  { versionKey: false },
+);
+
 const SubscriberSchema = new Schema({ email: { type: String, required: true, unique: true }, createdAt: String }, { versionKey: false });
 
 function model<T>(name: string, schema: Schema<T>): Model<T> {
@@ -129,3 +142,4 @@ export const GroupModel = model<Group>("Group", GroupSchema);
 export const TradeModel = model<Trade>("Trade", TradeSchema);
 export const UserModel = model<User>("User", UserSchema);
 export const SubscriberModel = model("Subscriber", SubscriberSchema);
+export const SupportTicketModel = model<SupportTicket>("SupportTicket", SupportTicketSchema);

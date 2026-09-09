@@ -151,6 +151,16 @@ export interface User {
   watchlist: string[];
 }
 
+export interface SupportTicket {
+  id: string;
+  userId: string;
+  email: string;
+  message: string;
+  transcript: string[];
+  status: "open" | "closed";
+  createdAt: string;
+}
+
 export type SortKey = "trending" | "volume" | "newest" | "probability" | "closing";
 export type QuickFilter = "high-volume" | "rising" | "falling" | "new" | "closing-soon";
 

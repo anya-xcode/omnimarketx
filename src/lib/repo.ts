@@ -15,6 +15,7 @@ import type {
   MarketSummary,
   Paginated,
   Position,
+  SupportTicket,
   Trade,
   TradeSide,
   Trader,
@@ -423,6 +424,33 @@ export async function placeTrade(input: PlaceTradeInput): Promise<{ trade: Trade
   await m.TradeModel.create(trade);
   await m.UserModel.updateOne({ id: user.id }, { $set: { balance } });
   return { trade, market: updated, user: nextUser };
+}
+
+/* ------------------------------------------------------------------ */
+/* Support                                                             */
+/* ------------------------------------------------------------------ */
+
+export async function createSupportTicket(input: { userId: string; email: string; message: string; transcript: string[] }): Promise<SupportTicket> {
+  const message = input.message.trim().slice(0, 1000);
+  if (message.length < 3) throw new RepoError("Please describe your question in a few words");
+  const email = input.email.trim().toLowerCase().slice(0, 120);
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) throw new RepoError("Please enter a valid email address");
+  const ticket: SupportTicket = {
+    id: uid("tkt"),
+    userId: input.userId,
+    email,
+    message,
+    transcript: input.transcript.slice(-20).map((s) => String(s).slice(0, 500)),
+    status: "open",
+    createdAt: new Date().toISOString(),
+  };
+  if (!hasDatabase()) {
+    getMemoryStore().tickets.push(ticket);
+    return ticket;
+  }
+  const m = await models();
+  await m.SupportTicketModel.create(ticket);
+  return ticket;
 }
 
 /* ------------------------------------------------------------------ */

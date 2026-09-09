@@ -68,6 +68,27 @@ test.describe("OmniMarketX redesign", () => {
     await expect(page.getByRole("status").filter({ hasText: "Learner badge earned" })).toBeVisible();
   });
 
+  test("support assistant answers fixed questions and hands off to a human with a reply time", async ({ page }) => {
+    await page.goto("/learn");
+    await page.getByRole("button", { name: "Chat with us" }).click();
+    const panel = page.getByRole("dialog", { name: "Omni Assistant" });
+    await expect(panel).toBeVisible();
+    // Option buttons on the opening message.
+    await panel.getByRole("button", { name: "How do I start?" }).click();
+    await expect(panel.getByText("Three steps")).toBeVisible({ timeout: 5_000 });
+    await expect(panel.getByRole("link", { name: /Read more/ }).first()).toBeVisible();
+    // Free text: the exact question the live bot failed on.
+    await panel.getByLabel("Type a question…").fill("explain me that platform");
+    await panel.getByRole("button", { name: "Send" }).click();
+    await expect(panel.getByText("social prediction market")).toBeVisible({ timeout: 5_000 });
+    // Human hand-off with hours and a ticket.
+    await panel.getByRole("button", { name: "Talk to a human" }).first().click();
+    await expect(panel.getByText(/replies within 2 hours/)).toBeVisible({ timeout: 5_000 });
+    await panel.getByLabel("Your question").fill("Can I use a Malaysian bank account?");
+    await panel.getByRole("button", { name: "Send to the team" }).click();
+    await expect(panel.getByText(/Your ticket is #/)).toBeVisible({ timeout: 10_000 });
+  });
+
   test("watchlist star adds a market to the watchlist page", async ({ page }) => {
     await page.goto("/markets/will-openai-release-gpt-6-before-31-december-2026");
     const star = page.getByRole("button", { name: "Add to watchlist" }).first();
