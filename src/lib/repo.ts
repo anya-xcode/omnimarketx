@@ -1,6 +1,6 @@
 import "server-only";
 import { connectDb, hasDatabase } from "./db";
-import { getMemoryStore } from "./memory-store";
+import { getMemoryStore, persistMemoryStore } from "./memory-store";
 import { filterMarkets, toSummary } from "./market-query";
 import { applyTradeToOutcomes, changeBetween, isMarketClosed, outcomeById, primaryOutcome } from "./pricing";
 import { buildPositions } from "./positions";
@@ -187,6 +187,7 @@ export async function createPost(user: User, body: string, marketSlug?: string):
   };
   if (!hasDatabase()) {
     getMemoryStore().feed.unshift(post);
+    persistMemoryStore();
     return post;
   }
   const m = await models();
@@ -222,6 +223,7 @@ export async function subscribe(email: string) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)) throw new RepoError("Please enter a valid email address");
   if (!hasDatabase()) {
     getMemoryStore().subscribers.add(e);
+    persistMemoryStore();
     return;
   }
   const m = await models();
@@ -244,6 +246,7 @@ export async function ensureUser(id: string): Promise<User> {
     if (!u) {
       u = newUser(id);
       store.users.set(id, u);
+      persistMemoryStore();
     }
     return u;
   }
@@ -270,6 +273,7 @@ export async function updateUserName(id: string, name: string): Promise<User> {
   const next = { ...user, name: clean, handle };
   if (!hasDatabase()) {
     getMemoryStore().users.set(id, next);
+    persistMemoryStore();
     return next;
   }
   const m = await models();
@@ -285,6 +289,7 @@ export async function toggleWatchlist(id: string, slug: string): Promise<string[
   const watchlist = [...set];
   if (!hasDatabase()) {
     getMemoryStore().users.set(id, { ...user, watchlist });
+    persistMemoryStore();
     return watchlist;
   }
   const m = await models();
@@ -411,6 +416,7 @@ export async function placeTrade(input: PlaceTradeInput): Promise<{ trade: Trade
     store.markets[idx] = updated;
     store.trades.push(trade);
     store.users.set(user.id, nextUser);
+    persistMemoryStore();
     return { trade, market: updated, user: nextUser };
   }
   const m = await models();
@@ -446,6 +452,7 @@ export async function createSupportTicket(input: { userId: string; email: string
   };
   if (!hasDatabase()) {
     getMemoryStore().tickets.push(ticket);
+    persistMemoryStore();
     return ticket;
   }
   const m = await models();

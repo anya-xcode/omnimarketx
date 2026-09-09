@@ -5,7 +5,7 @@ The brief was “take the existing product and make it better”. This repo is m
 
 | | |
 |---|---|
-| **Stack** | Next.js 16 (React 19, App Router) · TypeScript · Tailwind CSS v4 · Node route handlers · MongoDB (Mongoose) · Zustand · Recharts · Vitest · Playwright |
+| **Stack** | Next.js 16 (React 19, App Router) · TypeScript · Tailwind CSS v4 · Node route handlers · file-backed store (optional MongoDB via Mongoose) · Zustand · Recharts · Vitest · Playwright |
 | **Live demo** | _add your deployment URL here_ |
 | **Screenshots** | [`docs/screenshots/`](docs/screenshots/) (before/after, light/dark, desktop/mobile) |
 
@@ -73,7 +73,7 @@ The live site's Zendesk chat could not answer "how can I start?" or "explain me 
 
 ### Engineering
 - **Node API** under `/api/*` (markets, market detail, trades, portfolio, session, watchlist, feed, search, leaderboard, newsletter, health) with a consistent `{ ok, data | error }` envelope, validation and cache headers.
-- **MongoDB via Mongoose**, with a repository layer (`src/lib/repo.ts`) that is the single place pages and API routes read from. If `MONGODB_URI` is not set, the same repository runs on an in-memory seed store, so the app always works and tests never need a database.
+- **One repository layer** (`src/lib/repo.ts`) is the single place pages and API routes read from. By default it runs on the built-in seed data with a file-backed store (`.data/state.json`), so the app needs no database at all; set `MONGODB_URI` and the same functions use MongoDB via Mongoose instead.
 - **Idempotent auto-seeding.** An empty database is seeded with upserts on first request, safe under concurrent build workers. `npm run seed` resets it.
 - **Deterministic seed data.** 26 markets across 7 categories (mostly the real questions from the live site, with realistic prices/volumes), 90 days of generated price history that lands exactly on today's price, feed posts, traders, groups and blog posts.
 - **Pure domain logic** (`pricing.ts`, `positions.ts`, `market-query.ts`, `format.ts`) with unit tests, used identically by the server, the API and the client.
@@ -82,16 +82,19 @@ The live site's Zendesk chat could not answer "how can I start?" or "explain me 
 
 ## 3. Running it
 
+No database is needed. The app ships with its own seed data and keeps demo trades, watchlists, display names and support tickets in a JSON file (`.data/state.json`, git-ignored), so everything survives a restart.
+
 ```bash
 npm install
 npm run dev                       # http://localhost:3000
 ```
 
-Environment variables go in a local `.env.local` (all `.env*` files are git-ignored):
+Optional environment variables go in a local `.env.local` (all `.env*` files are git-ignored):
 
 ```bash
-MONGODB_URI=mongodb://127.0.0.1:27017/omnimarketx   # optional: omit to run on the in-memory seed store
-NEXT_PUBLIC_SITE_URL=http://localhost:3000            # public URL used for metadata and Open Graph
+NEXT_PUBLIC_SITE_URL=http://localhost:3000   # public URL used for metadata and Open Graph
+# MONGODB_URI=mongodb://...                    # optional: switch the same code to MongoDB
+# OMX_DATA_FILE=off                            # optional: keep demo state in memory only
 ```
 
 Useful scripts:
@@ -99,19 +102,20 @@ Useful scripts:
 | Script | What it does |
 |---|---|
 | `npm run build && npm start` | Production build and server |
-| `npm run seed` | Reset MongoDB to the canonical seed dataset |
 | `npm run check` | Lint + typecheck + unit tests |
-| `npm run test` | Vitest unit/component tests (32 tests) |
+| `npm run test` | Vitest unit/component tests |
 | `npm run test:e2e` | Playwright smoke tests on desktop + mobile (needs a production server, or set `E2E_BASE_URL`) |
+| `npm run seed` | Only when using MongoDB: reset it to the seed dataset |
 
-`GET /api/health` reports whether the app is on `mongodb` or `memory` storage.
+`GET /api/health` reports which storage is active (`memory` or `mongodb`).
 
 ## 4. Deploying
 
-1. Create a free MongoDB Atlas cluster and copy the connection string.
-2. Push this repo to GitHub and import it into Vercel (or any Node host).
-3. Set the environment variables `MONGODB_URI` and `NEXT_PUBLIC_SITE_URL` (your public URL).
-4. Deploy. The database seeds itself on the first request.
+1. Push this repo to GitHub and import it into Vercel (or any Node host).
+2. Set `NEXT_PUBLIC_SITE_URL` to your public URL. That is the only required variable.
+3. Deploy.
+
+Storage notes: on a normal Node server (Render, Railway, a VPS) the JSON file persists demo state across restarts. On serverless hosts such as Vercel the filesystem is read-only, so demo state lives in memory per instance and can reset after idle time; every page and market still works, only a visitor's demo trades may disappear. If you want durable state there, set `MONGODB_URI` to a free MongoDB Atlas cluster and the same code switches over, seeding itself on first request.
 
 ## 5. Project structure
 

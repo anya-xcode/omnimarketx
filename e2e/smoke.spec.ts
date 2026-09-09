@@ -91,6 +91,8 @@ test.describe("OmniMarketX redesign", () => {
 
   test("watchlist star adds a market to the watchlist page", async ({ page }) => {
     await page.goto("/markets/will-openai-release-gpt-6-before-31-december-2026");
+    // The session request fires after hydration; waiting for it guarantees the star's handler is attached.
+    await page.waitForResponse((r) => r.url().includes("/api/session"));
     const star = page.getByRole("button", { name: "Add to watchlist" }).first();
     await expect(star).toBeVisible();
     await star.click();
