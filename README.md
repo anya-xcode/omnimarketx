@@ -65,8 +65,14 @@ I audited the live site on desktop (1440px) and mobile (390px), read the rendere
 
 ```bash
 npm install
-cp .env.example .env.local        # set MONGODB_URI, or leave it unset to use the in-memory store
 npm run dev                       # http://localhost:3000
+```
+
+Environment variables go in a local `.env.local` (all `.env*` files are git-ignored):
+
+```bash
+MONGODB_URI=mongodb://127.0.0.1:27017/omnimarketx   # optional: omit to run on the in-memory seed store
+NEXT_PUBLIC_SITE_URL=http://localhost:3000            # public URL used for metadata and Open Graph
 ```
 
 Useful scripts:
