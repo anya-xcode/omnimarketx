@@ -8,9 +8,10 @@ import { MarketWorkspace } from "@/components/market/market-workspace";
 import { WatchButton } from "@/components/market/watch-button";
 import { ShareButton } from "@/components/market/share-button";
 import { CATEGORY_MAP } from "@/lib/categories";
-import { formatCompact, formatDate, formatMoney, formatPct, timeUntil } from "@/lib/format";
+import { formatCents, formatCompact, formatDate, formatMoney, formatPct, timeAgo, timeUntil } from "@/lib/format";
 import { isMarketClosed, primaryOutcome } from "@/lib/pricing";
-import { getMarket, getRelatedMarkets } from "@/lib/repo";
+import { getMarket, getMarketActivity, getRelatedMarkets } from "@/lib/repo";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
   const [{ slug }, sp] = await Promise.all([props.params, props.searchParams]);
   const market = await getMarket(slug);
   if (!market) notFound();
-  const related = await getRelatedMarkets(market, 3);
+  const [related, activity] = await Promise.all([getRelatedMarkets(market, 3), getMarketActivity(market.slug, 8)]);
   const cat = CATEGORY_MAP[market.category];
   const flag = regionFlag(market.region);
   const initialOutcome = typeof sp.outcome === "string" ? sp.outcome : undefined;
@@ -105,7 +106,34 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
           )}
         </div>
 
-        <div className="card overflow-hidden self-start">
+        <div className="space-y-5 self-start">
+        <div className="card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <h2 className="text-sm font-bold">Recent activity</h2>
+            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted">
+              <span className="size-1.5 rounded-full bg-yes animate-pulse-dot" aria-hidden /> Live
+            </span>
+          </div>
+          {activity.length === 0 ? (
+            <p className="px-4 py-6 text-center text-sm text-muted">No trades yet. Be the first to take a position.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {activity.map((t) => (
+                <li key={t.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
+                  <span className={cn("w-10 rounded-md px-1.5 py-0.5 text-center text-[10px] font-bold uppercase", t.side === "buy" ? "bg-yes-soft text-yes" : "bg-no-soft text-no")}>{t.side}</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    <span className="font-semibold">{t.traderName}</span>{" "}
+                    <span className="text-muted">
+                      {t.shares.toFixed(1)} {t.outcomeLabel} @ {formatCents(t.price)}
+                    </span>
+                  </span>
+                  <span className="shrink-0 text-xs text-faint" suppressHydrationWarning>{timeAgo(t.createdAt)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="card overflow-hidden">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h2 className="text-sm font-bold">More in {cat.label}</h2>
             <Link href={`/markets?category=${market.category}`} className="text-xs font-semibold text-brand hover:underline">
@@ -117,6 +145,7 @@ export default async function MarketPage(props: PageProps<"/markets/[slug]">) {
               <MarketRow key={m.slug} market={m} compact />
             ))}
           </div>
+        </div>
         </div>
       </section>
       <p className="flex items-center gap-1.5 text-xs text-faint">

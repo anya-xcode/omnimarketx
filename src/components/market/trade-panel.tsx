@@ -138,6 +138,15 @@ export function TradePanel({
           </div>
         )}
 
+        {position && side === "buy" && !closed && (
+          <p className="flex items-center justify-between rounded-xl bg-accent-soft px-3 py-2 text-xs text-accent">
+            <span>You hold {position.shares.toFixed(2)} {outcome.label} shares</span>
+            <span className={cn("font-bold tabular", position.pnl >= 0 ? "text-yes" : "text-no")}>
+              {position.pnl >= 0 ? "+" : "-"}${Math.abs(position.pnl).toFixed(2)}
+            </span>
+          </p>
+        )}
+
         {closed ? (
           <p className="flex items-center gap-2 rounded-xl bg-surface-2 p-3 text-sm text-muted">
             <Lock className="size-4" /> This market is closed for trading.

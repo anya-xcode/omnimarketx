@@ -1,4 +1,4 @@
-import { Activity, BarChart3, BookOpen, Briefcase, Crown, Flame, Home, LayoutGrid, MessageSquare, Trophy, type LucideIcon } from "lucide-react";
+import { Activity, BarChart3, BookOpen, Briefcase, Crown, Flame, Home, LayoutGrid, MessageSquare, Star, Trophy, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -13,6 +13,7 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: "/trending", label: "Trending", icon: Flame, description: "Most active right now" },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy, description: "Top predictors" },
   { href: "/portfolio", label: "Portfolio", icon: Briefcase, description: "Positions and demo balance" },
+  { href: "/watchlist", label: "Watchlist", icon: Star, description: "Markets you starred" },
   { href: "/activity", label: "Activity", icon: Activity, description: "Latest trades on the platform" },
 ];
 

@@ -5,10 +5,26 @@ test.describe("OmniMarketX redesign", () => {
     const res = await page.goto("/");
     expect(res?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Trade what");
-    await expect(page.getByRole("heading", { name: "Trending markets" })).toBeVisible();
+    const tabs = page.getByRole("tablist", { name: "Market lists" });
+    await expect(tabs).toBeVisible();
+    await expect(page.getByRole("tabpanel").getByRole("article").first()).toBeVisible();
     const html = await res!.text();
-    expect(html).toContain("Trending markets");
+    expect(html).toContain("Market movers");
     expect(html).not.toContain("Loading OmniMarketX");
+
+    // Tabs swap the rail client-side.
+    await tabs.getByRole("tab", { name: "Closing soon" }).click();
+    await expect(page.getByRole("tabpanel").getByRole("article").first()).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("watchlist star adds a market to the watchlist page", async ({ page }) => {
+    await page.goto("/markets/will-openai-release-gpt-6-before-31-december-2026");
+    const star = page.getByRole("button", { name: "Add to watchlist" }).first();
+    await expect(star).toBeVisible();
+    await star.click();
+    await expect(page.getByRole("status").filter({ hasText: "Added to watchlist" })).toBeVisible();
+    await page.goto("/watchlist");
+    await expect(page.getByRole("article").first()).toContainText("GPT-6");
   });
 
   test("markets page filters by category and search via the URL", async ({ page }) => {

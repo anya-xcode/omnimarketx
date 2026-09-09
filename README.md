@@ -43,6 +43,15 @@ I audited the live site on desktop (1440px) and mobile (390px), read the rendere
 - **Accessibility.** Skip link, landmark roles, labelled controls, `aria-pressed`/`aria-current` states, focus rings, reduced-motion support, tabular numerals, unique form ids (the mobile sheet and desktop rail don't collide).
 - **Polish everywhere.** Empty states with a next action, toasts for every mutation, share button (native share / clipboard), watchlist star, newsletter form with validation, legal pages, 404 and error boundaries, OG image and favicon, sitemap and robots.
 
+### Round 2: making it feel alive
+- **Live price ticker** across the top of the home page (pure CSS marquee, pauses on hover, static for reduced motion).
+- **Tabbed market rail** on home: Trending / New / Closing soon / High volume, swapped client-side from the API with skeletons and a staggered card entrance.
+- **Working watchlist.** The star on every card now feeds a sidebar section with live prices, a count badge in the nav, and a `/watchlist` page.
+- **Navigation progress bar** under the top bar on every route change, including command-palette jumps.
+- **Market page activity.** A live "Recent activity" list of trades on that market (with trader names) next to related markets, and a "You hold N shares · P&L" strip in the trade panel when you have a position.
+- **Portfolio allocation** bar by category with a legend.
+- **Sticky filter toolbar** on the markets page and count-up hero stats.
+
 ### Engineering
 - **Node API** under `/api/*` (markets, market detail, trades, portfolio, session, watchlist, feed, search, leaderboard, newsletter, health) with a consistent `{ ok, data | error }` envelope, validation and cache headers.
 - **MongoDB via Mongoose**, with a repository layer (`src/lib/repo.ts`) that is the single place pages and API routes read from. If `MONGODB_URI` is not set, the same repository runs on an in-memory seed store, so the app always works and tests never need a database.

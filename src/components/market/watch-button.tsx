@@ -15,12 +15,16 @@ export function WatchButton({ slug, className, size = "sm" }: { slug: string; cl
       aria-pressed={watched}
       aria-label={watched ? "Remove from watchlist" : "Add to watchlist"}
       title={watched ? "Remove from watchlist" : "Add to watchlist"}
-      onClick={(e) => {
+      onClick={async (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (!user) {
-          toast({ title: "Still connecting…", description: "Try again in a second." });
-          return;
+          // Session is created lazily; make sure it exists before toggling.
+          await useSession.getState().load();
+          if (!useSession.getState().user) {
+            toast({ title: "Couldn't reach the server", description: "Please try again.", variant: "error" });
+            return;
+          }
         }
         void toggle(slug);
         toast({ title: watched ? "Removed from watchlist" : "Added to watchlist", variant: "success" });

@@ -13,6 +13,7 @@ import type { MarketSummary, Trader } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { api } from "@/store/session";
 import { PRIMARY_NAV, SECONDARY_NAV } from "./nav-config";
+import { useNavProgress } from "./nav-progress";
 
 interface PaletteState {
   isOpen: boolean;
@@ -120,6 +121,7 @@ function PaletteDialog({ close }: { close: () => void }) {
   const go = useCallback(
     (item: Item) => {
       close();
+      useNavProgress.getState().start();
       router.push(item.href);
     },
     [close, router],

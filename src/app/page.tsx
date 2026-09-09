@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { CategoryChips } from "@/components/market/category-chips";
-import { MarketCard } from "@/components/market/market-card";
 import { SectionHeader } from "@/components/ui/primitives";
 import { Hero } from "@/components/home/hero";
+import { MarketTabs } from "@/components/home/market-tabs";
+import { Ticker } from "@/components/home/ticker";
 import { CtaBand, GroupsPreview, HowItWorks, MoversRail, PulsePreview, TopPredictors } from "@/components/home/sections";
 import { getFeaturedMarkets, getFeed, getGroups, getMarketsBySlugs, getMovers, getPlatformStats, getTraders, getTrendingMarkets } from "@/lib/repo";
 
@@ -11,7 +12,7 @@ export const revalidate = 30;
 export default async function HomePage() {
   const [featured, top, movers, feed, traders, groups, stats] = await Promise.all([
     getFeaturedMarkets(1),
-    getTrendingMarkets(8),
+    getTrendingMarkets(14),
     getMovers(8),
     getFeed(3),
     getTraders("all", "roi"),
@@ -24,6 +25,9 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-10">
+      <div className="-mt-6">
+        <Ticker markets={top} />
+      </div>
       <Hero spotlight={spotlight} stats={stats} />
 
       <section>
@@ -31,14 +35,7 @@ export default async function HomePage() {
         <CategoryChips active="all" basePath="/markets" />
       </section>
 
-      <section>
-        <SectionHeader title="Trending markets" description="Ranked by volume, activity and momentum" href="/markets" hrefLabel="View all markets" />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {top.map((m, i) => (
-            <MarketCard key={m.slug} market={m} priority={i < 4} />
-          ))}
-        </div>
-      </section>
+      <MarketTabs initial={top.slice(0, 8)} />
 
       <section>
         <SectionHeader title="Market movers" description="Biggest 24-hour probability swings" href="/trending" />

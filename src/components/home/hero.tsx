@@ -7,6 +7,7 @@ import { formatCents, formatCompact, formatMoney, formatPct, timeUntil } from "@
 import { primaryOutcome } from "@/lib/pricing";
 import type { MarketSummary } from "@/lib/types";
 import { TryDemoButton } from "./try-demo-button";
+import { CountUp } from "@/components/ui/count-up";
 
 export function Hero({ spotlight, stats }: { spotlight: MarketSummary; stats: { markets: number; volume: number; traders: number } }) {
   const primary = primaryOutcome(spotlight);
@@ -35,16 +36,18 @@ export function Hero({ spotlight, stats }: { spotlight: MarketSummary; stats: { 
             <TryDemoButton />
           </div>
           <dl className="mt-8 grid max-w-md grid-cols-3 gap-4">
-            {[
-              ["Open markets", formatCompact(stats.markets)],
-              ["Volume traded", formatMoney(stats.volume)],
-              ["Traders", formatCompact(stats.traders)],
-            ].map(([k, v]) => (
-              <div key={k}>
-                <dt className="text-xs text-muted">{k}</dt>
-                <dd className="text-xl font-bold tabular tracking-tight sm:text-2xl">{v}</dd>
-              </div>
-            ))}
+            <div>
+              <dt className="text-xs text-muted">Open markets</dt>
+              <dd className="text-xl font-bold tabular tracking-tight sm:text-2xl"><CountUp value={stats.markets} kind="compact" /></dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted">Volume traded</dt>
+              <dd className="text-xl font-bold tabular tracking-tight sm:text-2xl"><CountUp value={stats.volume} kind="money" /></dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted">Traders</dt>
+              <dd className="text-xl font-bold tabular tracking-tight sm:text-2xl"><CountUp value={stats.traders} kind="compact" /></dd>
+            </div>
           </dl>
         </div>
 

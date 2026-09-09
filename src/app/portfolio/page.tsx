@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Briefcase, History } from "lucide-react";
 import { EmptyState, Stat } from "@/components/ui/primitives";
-import { CATEGORY_MAP } from "@/lib/categories";
+import { CATEGORIES, CATEGORY_MAP } from "@/lib/categories";
 import { formatCents, formatDate, formatMoney, formatSignedMoney, timeAgo } from "@/lib/format";
 import { getPositions, getTrades, getUser } from "@/lib/repo";
 import { getSessionId } from "@/lib/session";
@@ -17,6 +17,7 @@ export default async function PortfolioPage() {
   const invested = positions.reduce((s, p) => s + p.invested, 0);
   const value = positions.reduce((s, p) => s + p.value, 0);
   const pnl = value - invested;
+  const allocation = CATEGORIES.map((c) => ({ ...c, value: positions.filter((p) => p.category === c.id).reduce((s, p) => s + p.value, 0) })).filter((c) => c.value > 0);
 
   return (
     <div className="space-y-6">
@@ -32,6 +33,29 @@ export default async function PortfolioPage() {
         <Stat label="Invested" value={formatMoney(invested, { compact: false })} />
         <Stat label="Unrealised P&L" value={<span className={pnl >= 0 ? "text-yes" : "text-no"}>{formatSignedMoney(pnl)}</span>} hint={invested > 0 ? `${((pnl / invested) * 100).toFixed(1)}% return` : undefined} />
       </div>
+
+      {allocation.length > 0 && (
+        <section className="card p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-bold">Allocation by category</h2>
+            <span className="text-xs text-muted tabular">{formatMoney(value, { compact: false })} across {allocation.length} categor{allocation.length === 1 ? "y" : "ies"}</span>
+          </div>
+          <div className="flex h-3 overflow-hidden rounded-full bg-surface-3" role="img" aria-label="Portfolio allocation by category">
+            {allocation.map((c) => (
+              <div key={c.id} style={{ width: `${(c.value / value) * 100}%`, background: c.color }} title={`${c.label} ${((c.value / value) * 100).toFixed(0)}%`} />
+            ))}
+          </div>
+          <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-xs">
+            {allocation.map((c) => (
+              <li key={c.id} className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded-full" style={{ background: c.color }} aria-hidden />
+                <span className="font-medium">{c.label}</span>
+                <span className="tabular text-muted">{((c.value / value) * 100).toFixed(0)}%</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section>
         <h2 className="mb-3 text-lg font-bold">Open positions</h2>

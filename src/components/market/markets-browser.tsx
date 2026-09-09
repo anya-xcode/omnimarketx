@@ -102,7 +102,7 @@ export function MarketsBrowser({ initial, query }: { initial: Paginated<MarketSu
     <div className="space-y-4">
       <CategoryChips active={query.category ?? "all"} basePath={pathname} params={chipParams} />
 
-      <div className="card flex flex-col gap-3 p-3 sm:flex-row sm:items-center">
+      <div className="card flex flex-col gap-3 p-3 sm:flex-row sm:items-center lg:sticky lg:top-[4.5rem] lg:z-20 lg:bg-surface/90 lg:backdrop-blur">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-faint" />
           <input
@@ -183,7 +183,7 @@ export function MarketsBrowser({ initial, query }: { initial: Paginated<MarketSu
           action={{ label: "Clear filters", href: pathname }}
         />
       ) : view === "grid" ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 stagger sm:grid-cols-2 xl:grid-cols-3">
           {items.map((m) => (
             <MarketCard key={m.slug} market={m} />
           ))}

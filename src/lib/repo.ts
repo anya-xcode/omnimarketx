@@ -308,6 +308,27 @@ export async function getRecentActivity(limit = 20): Promise<Trade[]> {
   return m.TradeModel.find({}, NO_ID).sort({ createdAt: -1 }).limit(limit).lean<Trade[]>();
 }
 
+export type ActivityItem = Trade & { traderName: string };
+
+/** Latest trades on one market, with display names resolved. */
+export async function getMarketActivity(slug: string, limit = 8): Promise<ActivityItem[]> {
+  let trades: Trade[];
+  let nameOf: (id: string) => string;
+  if (!hasDatabase()) {
+    const store = getMemoryStore();
+    trades = store.trades.filter((t) => t.marketSlug === slug).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, limit);
+    nameOf = (id) => store.users.get(id)?.name ?? "Trader";
+  } else {
+    const m = await models();
+    trades = await m.TradeModel.find({ marketSlug: slug }, NO_ID).sort({ createdAt: -1 }).limit(limit).lean<Trade[]>();
+    const ids = [...new Set(trades.map((t) => t.userId))];
+    const users = ids.length ? await m.UserModel.find({ id: { $in: ids } }, { _id: 0, id: 1, name: 1 }).lean<Pick<User, "id" | "name">[]>() : [];
+    const map = new Map(users.map((u) => [u.id, u.name]));
+    nameOf = (id) => map.get(id) ?? "Trader";
+  }
+  return trades.map((t) => ({ ...t, traderName: nameOf(t.userId) }));
+}
+
 export async function getPositions(userId: string): Promise<Position[]> {
   const trades = await getTrades(userId, 1000);
   if (trades.length === 0) return [];

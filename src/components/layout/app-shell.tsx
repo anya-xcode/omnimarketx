@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { ThemeProvider } from "next-themes";
+import { NavProgress } from "./nav-progress";
 import { useSession } from "@/store/session";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthModal } from "./auth-modal";
@@ -23,6 +24,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <SessionBoot />
+      <Suspense fallback={null}>
+        <NavProgress />
+      </Suspense>
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-fg"

@@ -9,8 +9,9 @@ import { useSession } from "@/store/session";
 import { Logo } from "./logo";
 import { PRIMARY_NAV, SECONDARY_NAV, isActivePath, type NavItem } from "./nav-config";
 import { ThemeToggle } from "./theme-toggle";
+import { SidebarWatchlist } from "./sidebar-watchlist";
 
-function NavLink({ item, active }: { item: NavItem; active: boolean }) {
+function NavLink({ item, active, badge }: { item: NavItem; active: boolean; badge?: number }) {
   return (
     <Link
       href={item.href}
@@ -22,6 +23,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
     >
       <item.icon className={cn("size-[18px] shrink-0", active ? "text-brand" : "text-faint group-hover:text-text")} />
       <span className="truncate">{item.label}</span>
+      {badge ? <span className="ml-auto rounded-md bg-surface-3 px-1.5 py-0.5 text-[11px] font-bold tabular text-muted">{badge}</span> : null}
     </Link>
   );
 }
@@ -38,9 +40,10 @@ export function Sidebar() {
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-4">
         <div className="space-y-0.5">
           {PRIMARY_NAV.map((item) => (
-            <NavLink key={item.href} item={item} active={isActivePath(pathname, item.href)} />
+            <NavLink key={item.href} item={item} active={isActivePath(pathname, item.href)} badge={item.href === "/watchlist" ? user?.watchlist.length || undefined : undefined} />
           ))}
         </div>
+        <SidebarWatchlist />
         <div>
           <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-faint">Discover</p>
           <div className="space-y-0.5">
