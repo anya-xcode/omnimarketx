@@ -24,7 +24,7 @@ function SessionBoot() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
       <SessionBoot />
       <Suspense fallback={null}>
         <NavProgress />

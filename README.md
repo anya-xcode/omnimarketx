@@ -9,7 +9,7 @@ The brief was “take the existing product and make it better”. This repo is m
 | **Live demo** | _add your deployment URL here_ |
 | **Screenshots** | [`docs/screenshots/`](docs/screenshots/) (before/after, light/dark, desktop/mobile) |
 
-![Home, light](docs/screenshots/home-desktop.png)
+![Home, dark (default)](docs/screenshots/home-dark.png)
 
 ---
 
@@ -39,7 +39,7 @@ I audited the live site on desktop (1440px) and mobile (390px), read the rendere
 - **Consistent cards.** Binary and multi-outcome markets share the same card frame (header / title / body / stats / actions), so the grid always aligns. Titles clamp to two lines; flags and categories are badges, not emoji in the headline.
 - **Meaningful numbers.** 24h change in probability points with direction colour, volume, traders, time-to-close, and a “Market pulse” gauge on Trending derived from real movement.
 - **Mobile-first shell.** Collapsible sidebar → drawer, bottom tab bar, no horizontal overflow on any page (verified by script at 390px), safe-area padding, touch-sized targets.
-- **Dark mode done properly.** Design tokens for both themes, system-aware, no flash, persisted, theme-colour meta for the browser chrome.
+- **Dark mode by default, done properly.** Dark is the default theme; light and system are one click away in the sidebar. Design tokens for both themes, no flash, persisted, theme-colour meta for the browser chrome.
 - **Accessibility.** Skip link, landmark roles, labelled controls, `aria-pressed`/`aria-current` states, focus rings, reduced-motion support, tabular numerals, unique form ids (the mobile sheet and desktop rail don't collide).
 - **Polish everywhere.** Empty states with a next action, toasts for every mutation, share button (native share / clipboard), watchlist star, newsletter form with validation, legal pages, 404 and error boundaries, OG image and favicon, sitemap and robots.
 
